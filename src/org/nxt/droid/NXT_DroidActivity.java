@@ -41,34 +41,33 @@ public class NXT_DroidActivity extends Activity {
 		// }
 
 		BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-		Set<BluetoothDevice> bondedDevices = btAdapter.getBondedDevices();
-
-		for (BluetoothDevice bluetoothDevice : bondedDevices) {
-			if (bluetoothDevice.getName().equals("NXT")) {
-				nxtDevice = bluetoothDevice;
+	
+			Set<BluetoothDevice> bondedDevices = btAdapter.getBondedDevices();
+			for (BluetoothDevice bluetoothDevice : bondedDevices) {
+				if (bluetoothDevice.getName().equals("NXT")) {
+					nxtDevice = bluetoothDevice;
+				}
 			}
-		}
 
-		if (nxtDevice == null) {
-			tStatus.setText("No paired NXT device found");
-			return;
-		}
+			if (nxtDevice == null) {
+				tStatus.setText("No paired NXT device found");
+				try {
+					bs = nxtDevice
+							.createRfcommSocketToServiceRecord(UUID
+									.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+					bs.connect();
 
-		try {
-			bs = nxtDevice.createRfcommSocketToServiceRecord(UUID
-					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-			bs.connect();
-			
-			
-			nxtDos = new DataOutputStream(bs.getOutputStream());
-			nxtDos.writeInt(111);
-			nxtDis = new DataInputStream(bs.getInputStream());
-			
+					nxtDos = new DataOutputStream(bs.getOutputStream());
+					nxtDos.writeInt(111);
+					nxtDis = new DataInputStream(bs.getInputStream());
 
-			tStatus.setText("Successfully connected to NXT" + nxtDis.readInt());
-		} catch (IOException e) {
-			tStatus.setText("Connection to NXT failed");
-		
+					tStatus.setText("Successfully connected to NXT"
+							+ nxtDis.readInt());
+				} catch (IOException e) {
+					tStatus.setText("Connection to NXT failed");
+
+				}
+
 		}
 
 	}
