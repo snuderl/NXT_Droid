@@ -6,11 +6,6 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 
-import lejos.nxt.addon.NXTMMXMotor;
-import lejos.pc.comm.NXTComm;
-import lejos.pc.comm.NXTConnectionManager;
-import lejos.pc.comm.NXTConnector;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -23,7 +18,6 @@ public class NXT_DroidActivity extends Activity {
 	final int REQUEST_ENABLE_BT = 0;
 	BluetoothDevice nxtDevice;
 	TextView tStatus;
-	NXTConnector conn;
 	DataOutputStream nxtDos;
 	DataInputStream nxtDis;
 	BluetoothSocket bs;
@@ -77,14 +71,6 @@ public class NXT_DroidActivity extends Activity {
 		
 		}
 
-	}
-
-	public NXTConnector connect() {
-		// info
-		// https://github.com/Shawn-in-Tokyo/leJOS-Droid/tree/master/leJOS-Droid/src/lejos/android
-		NXTConnector conn = new NXTConnector();
-		conn.connectTo("btspp://NXT", NXTComm.LCP);
-		return conn;
 	}
 
 }
