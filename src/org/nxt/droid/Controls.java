@@ -20,8 +20,10 @@ import android.util.Log;
  */
 public class Controls extends Thread {
 	Handler mUIMessageHandler;
-	BluetoothSocket bs=null;
+	BluetoothSocket bs = null;
 	private String TAG = "Control";
+
+	ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<Packet>();
 
 	/**
 	 * constructor establishes call back path of the RCNavigationControl
@@ -29,10 +31,10 @@ public class Controls extends Thread {
 	 * @param mUIMessageHandler
 	 * @param control
 	 */
-	public Controls(Handler mUIMessageHandler,BluetoothSocket bs) {
+	public Controls(Handler mUIMessageHandler, BluetoothSocket bs) {
 		Log.d(TAG, " Controls start");
 		this.mUIMessageHandler = mUIMessageHandler;
-		this.bs=bs;
+		this.bs = bs;
 		setUp();
 	}
 
@@ -45,11 +47,11 @@ public class Controls extends Thread {
 	 *            bluetooth address
 	 */
 	public boolean setUp() {
-		boolean connected=false;
+		boolean connected = false;
 		try {
 			dataIn = new DataInputStream(bs.getInputStream());
 			dataOut = new DataOutputStream(bs.getOutputStream());
-			connected=true;
+			connected = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -69,8 +71,13 @@ public class Controls extends Thread {
 	 * sent <br>
 	 * calls showRobotPosition() on the controller
 	 */
-	class Reader extends Thread {
+	class Packet {
+		public int command;
+		public boolean response;
+		public float[] data;
+	}
 
+	class Worker extends Thread {
 
 		public boolean reading = false;
 		int count = 0;
@@ -79,7 +86,7 @@ public class Controls extends Thread {
 		public void run() {
 			setName("RCNavComms read thread");
 			isRunning = true;
-			while (isRunning) {
+			while (true) {
 				if (reading) // reads one message at a time
 				{
 					Log.d(TAG, "reading ");
@@ -92,21 +99,42 @@ public class Controls extends Thread {
 					} catch (IOException e) {
 						Log.d(TAG, "connection lost");
 						count++;
-						isRunning = count < 20;// give up
+						reading = count < 20;// give up
 						ok = false;
 					}
 					if (ok) {
 						sendPosToUIThread(x);
 						reading = false;
 					}
+				} else {
+					if (!queue.isEmpty()) {
+						try {
+							Packet m = queue.poll();
+							dataOut.writeInt(m.command); // convert the enum to
+															// an
+															// integer
+
+							for (float d : m.data) // iterate over the data
+													// array
+							{
+								dataOut.writeFloat(d);
+							}
+							dataOut.flush();
+							reading = m.response;
+						} catch (IOException e) {
+							Log.e(TAG, " send throws exception  ", e);
+						}
+					}
+				}
+				if (queue.isEmpty() && reading == false) {
 					try {
-						Thread.sleep(50);
-					} catch (InterruptedException ex) {
-						ex.printStackTrace();
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}// if reading
-			Thread.yield();
 		}// while is running
 
 	}
@@ -125,23 +153,12 @@ public class Controls extends Thread {
 	 * @param data
 	 *            an array of floats built from the collection list parameters.
 	 */
-	public void send(int command,boolean response, float... data) {
-		
-		while (reader.reading) {
-			Thread.yield();
-		}
-		try {
-			dataOut.writeInt(command); // convert the enum to an integer
-			
-			for (float d : data) // iterate over the data array
-			{
-				dataOut.writeFloat(d);
-			}
-			dataOut.flush();
-		} catch (IOException e) {
-			Log.e(TAG, " send throws exception  ", e);
-		}
-		reader.reading = response; // reader: listen for response
+	public void send(int command, boolean response, float... data) {
+		Packet m = new Packet();
+		m.command = command;
+		m.response = response;
+		m.data = data;
+		queue.add(m);
 	}
 
 	/**
@@ -152,7 +169,7 @@ public class Controls extends Thread {
 	 * used by send()
 	 */
 	private DataOutputStream dataOut;
-	private Reader reader = new Reader();
+	private Worker reader = new Worker();
 
 	public void sendPosToUIThread(String x) {
 		Bundle b = new Bundle();
