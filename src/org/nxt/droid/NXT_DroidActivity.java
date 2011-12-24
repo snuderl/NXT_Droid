@@ -3,8 +3,7 @@ package org.nxt.droid;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,7 +19,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +37,9 @@ public class NXT_DroidActivity extends Activity {
 	DataOutputStream nxtDos;
 	DataInputStream nxtDis;
 	public static final String tag = "NXT_DroidActivity";
+	BluetoothAdapter btAdapter;
+	ArrayAdapter<String> listAdapter;
+	ArrayList<BluetoothDevice> bondedDevices;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -40,93 +47,72 @@ public class NXT_DroidActivity extends Activity {
 		setContentView(R.layout.main);
 
 		tStatus = (TextView) findViewById(R.id.tStatus);
+		listAdapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, new ArrayList<String>());
+		final ListView lw = (ListView) findViewById(R.id.listView12);
+		lw.setAdapter(listAdapter);
+		lw.setOnItemClickListener(new OnItemClickListener() {
 
-		// conn = connect();
-		// nxtDos = conn.getDataOut();
-		// nxtDis = conn.getDataIn();
-		// try {
-		// nxtDos.writeInt(111);
-		// int recieve = nxtDis.readInt();
-		// tStatus.setText("Revieved: " + recieve);
-		// } catch (Exception e) {
-		// tStatus.setText("napaka pri sprejemu");
-		// }
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				nxtDevice = bondedDevices.get(arg2);
+
+				// connect
+				try {
+					BluetoothSocket bs = nxtDevice.createRfcommSocketToServiceRecord(UUID
+							.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+					bs.connect();
+
+					CharSequence text = "Connection success";
+					Toast.makeText(getApplicationContext(), text,
+							Toast.LENGTH_SHORT).show();
+
+					((Application) getApplicationContext()).bs = bs;
+					Intent i = new Intent(arg1.getContext(),
+							ControlActivity.class);
+					startActivity(i);
+				} catch (Exception e) {
+					e.printStackTrace();
+					CharSequence text = "Connection failed";
+					Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+				}
+
+			}
+		});
 
 		Button button_connect = (Button) findViewById(R.id.button1);
 		button_connect.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				BluetoothSocket bs = connect();
-				if (bs == null) {
-					CharSequence text = "Connection failed";
-					Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+
+				bondedDevices = new ArrayList<BluetoothDevice>();
+				Set<BluetoothDevice> bondedDevices1 = btAdapter
+						.getBondedDevices();
+				for (BluetoothDevice bluetoothDevice1 : bondedDevices1) {
+					bondedDevices.add(bluetoothDevice1);
 				}
-				else{
-					CharSequence text = "Connection success";
-					Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-					
-					((Application)getApplicationContext()).bs = bs;
-					Intent i = new Intent(v.getContext(), ControlActivity.class);
-					startActivity(i);
-					
+				for (int i = 0; i < bondedDevices.size(); i++) {
+					listAdapter.add(bondedDevices.get(i).getName() + "\n"
+							+ bondedDevices.get(i).getAddress());
 				}
 			}
 		});
 
-		BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+		btAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (btAdapter == null) {
 			showDialog(NoBT_Dialog);
 		} else {
-			Set<BluetoothDevice> bondedDevices = btAdapter.getBondedDevices();
-			for (BluetoothDevice bluetoothDevice : bondedDevices) {
-				if (bluetoothDevice.getName().equals("SNUDERL-LAPTOP")) {
-					nxtDevice = bluetoothDevice;
-				}
-			}
-			if (nxtDevice == null) {
-				tStatus.setText("No paired NXT device found");
-
-				CharSequence text = "Connection failed";
-				Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-				Log.v(tag, "No NXT paired");
+			if (!btAdapter.isEnabled()) {
+				Intent enableBtIntent = new Intent(
+						BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 			}
 		}
 
 	}
 
-	public BluetoothSocket connect() {
-		BluetoothSocket bs = null;
-		try {
-			bs = nxtDevice.createRfcommSocketToServiceRecord(UUID
-					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-//			Method m = nxtDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
-//	         bs = (BluetoothSocket) m.invoke(nxtDevice, 1);
-	         
-	         bs.connect();
-
-		} catch (IOException e) {
-			Log.v(tag, "Connectin failed.");
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-//		} catch (NoSuchMethodException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalArgumentException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (InvocationTargetException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		}
-		return bs;
-	}
 
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog;

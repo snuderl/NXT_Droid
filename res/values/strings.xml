@@ -3,5 +3,6 @@
 
     <string name="hello">Hello World, NXT_DroidActivity!</string>
     <string name="app_name">NXT_Droid</string>
+    <string name="recievedString">Recieved:</string>
 
 </resources>

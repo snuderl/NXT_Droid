@@ -23,7 +23,7 @@ import android.widget.TextView;
  * 
  */
 public class ControlActivity extends Activity implements SensorEventListener {
-
+TextView recieved;
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
@@ -34,7 +34,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE); 
 
 		tv = (TextView) findViewById(R.id.textView1);
-		
+		recieved = (TextView) findViewById(R.id.recieved);
 		control = new Controls(messageHandler, bs);
 		
 		control.run();
@@ -57,6 +57,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		@Override
 		public void handleMessage(Message msg) {
 			Log.d("Message recieved", msg.arg1 + "," + msg.arg2 + ".");
+			recieved.setText((String)msg.getData().get("vsebina"));
 		}
 	}
 

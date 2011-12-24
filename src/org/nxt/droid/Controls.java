@@ -81,16 +81,12 @@ public class Controls extends Thread {
 				if (reading) // reads one message at a time
 				{
 					Log.d(TAG, "reading ");
-					float x = 0;
-					float y = 0;
-					float h = 0;
+					String x = "";
 					boolean ok = false;
 					try {
-						x = dataIn.readFloat();
-						y = dataIn.readFloat();
-						h = dataIn.readFloat();
+						x = dataIn.readUTF();
 						ok = true;
-						Log.d(TAG, "data  " + x + " " + y + " " + h);
+						Log.d(TAG, "data  " + x);
 					} catch (IOException e) {
 						Log.d(TAG, "connection lost");
 						count++;
@@ -98,7 +94,7 @@ public class Controls extends Thread {
 						ok = false;
 					}
 					if (ok) {
-						sendPosToUIThread(x, y, h);
+						sendPosToUIThread(x);
 						reading = false;
 					}
 					try {
@@ -141,7 +137,7 @@ public class Controls extends Thread {
 		} catch (IOException e) {
 			Log.e(TAG, " send throws exception  ", e);
 		}
-		reader.reading = false; // reader: listen for response
+		reader.reading = true; // reader: listen for response
 	}
 
 	/**
@@ -154,10 +150,9 @@ public class Controls extends Thread {
 	private DataOutputStream dataOut;
 	private Reader reader = new Reader();
 
-	public void sendPosToUIThread(float x, float y, float h) {
-		float[] pos = { x, y, h };
+	public void sendPosToUIThread(String x) {
 		Bundle b = new Bundle();
-		b.putFloatArray("RobotInput", pos);
+		b.putString("vsebina", x);
 		Message message_holder = new Message();
 		message_holder.setData(b);
 		mUIMessageHandler.sendMessage(message_holder);
