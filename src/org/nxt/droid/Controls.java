@@ -86,7 +86,8 @@ public class Controls extends Thread {
 		public void run() {
 			setName("RCNavComms read thread");
 			isRunning = true;
-			while (true) {
+			int errorCount = 0;
+			while (isRunning) {
 				if (reading) // reads one message at a time
 				{
 					Log.d(TAG, "reading ");
@@ -101,6 +102,8 @@ public class Controls extends Thread {
 						count++;
 						reading = count < 20;// give up
 						ok = false;
+						errorCount++;
+						errorCount=0;
 					}
 					if (ok) {
 						sendPosToUIThread(x);
@@ -121,10 +124,15 @@ public class Controls extends Thread {
 							}
 							dataOut.flush();
 							reading = m.response;
+							errorCount=0;
 						} catch (IOException e) {
 							Log.e(TAG, " send throws exception  ", e);
+							errorCount++;
 						}
 					}
+				}
+				if(errorCount>=10){
+					sendPosToUIThread("Error in socket, try reconencting");
 				}
 				if (queue.isEmpty() && reading == false) {
 					try {

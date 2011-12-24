@@ -3,6 +3,8 @@
  */
 package org.nxt.droid;
 
+import java.io.IOException;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothSocket;
 import android.hardware.Sensor;
@@ -29,7 +31,7 @@ TextView recieved;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.control);
 
-		BluetoothSocket bs = ((Application) getApplicationContext()).bs;
+		final BluetoothSocket bs = ((Application) getApplicationContext()).bs;
 		UiMessage messageHandler = new UiMessage();
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE); 
 
@@ -46,6 +48,23 @@ TextView recieved;
 			public void onClick(View v) {
 				control.send(4, true, 1f);
 
+			}
+		});
+		Button disconnectButton= (Button)findViewById(R.id.disconect_button);
+		disconnectButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				onStop();
+				control.end();
+				try {
+					bs.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				finish();
 			}
 		});
 
