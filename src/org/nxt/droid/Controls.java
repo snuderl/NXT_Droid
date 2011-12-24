@@ -6,6 +6,7 @@ package org.nxt.droid;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
@@ -70,6 +71,7 @@ public class Controls extends Thread {
 	 */
 	class Reader extends Thread {
 
+
 		public boolean reading = false;
 		int count = 0;
 		boolean isRunning = false;
@@ -123,12 +125,14 @@ public class Controls extends Thread {
 	 * @param data
 	 *            an array of floats built from the collection list parameters.
 	 */
-	public void send(int command, float... data) {
+	public void send(int command,boolean response, float... data) {
+		
 		while (reader.reading) {
 			Thread.yield();
 		}
 		try {
 			dataOut.writeInt(command); // convert the enum to an integer
+			
 			for (float d : data) // iterate over the data array
 			{
 				dataOut.writeFloat(d);
@@ -137,7 +141,7 @@ public class Controls extends Thread {
 		} catch (IOException e) {
 			Log.e(TAG, " send throws exception  ", e);
 		}
-		reader.reading = true; // reader: listen for response
+		reader.reading = response; // reader: listen for response
 	}
 
 	/**

@@ -44,7 +44,7 @@ TextView recieved;
 
 			@Override
 			public void onClick(View v) {
-				control.send(1, 1);
+				control.send(4, true, 1f);
 
 			}
 		});
@@ -85,7 +85,7 @@ TextView recieved;
 				"Os Y :"+ Float.toString(event.values[1]) +"\n"+
 				"Os Z :"+ Float.toString(event.values[0]));
 		
-		control.send(4, event.values[0]);
+		control.send(1,false, event.values[0],event.values[1],event.values[2]);
 		
 		
 	}
