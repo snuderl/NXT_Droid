@@ -6,5 +6,7 @@
     <string name="recievedString">Recieved:</string>
     <string name="posljiGumb">Poslji testne podatke</string>
     <string name="disconectString">Disconnect</string>
+    <string name="naprava">"Naprava: "</string>
+    <string name="connect">Connect</string>
 
 </resources>

@@ -6,8 +6,10 @@ package org.nxt.droid;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,6 +23,7 @@ import android.util.Log;
 public class Controls extends Thread {
 	Handler mUIMessageHandler;
 	BluetoothSocket bs = null;
+	BluetoothDevice nxtDevice = null;
 	private String TAG = "Control";
 
 	ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<Packet>();
@@ -31,11 +34,10 @@ public class Controls extends Thread {
 	 * @param mUIMessageHandler
 	 * @param control
 	 */
-	public Controls(Handler mUIMessageHandler, BluetoothSocket bs) {
+	public Controls(Handler mUIMessageHandler, BluetoothDevice btBluetoothDevice) {
 		Log.d(TAG, " Controls start");
 		this.mUIMessageHandler = mUIMessageHandler;
-		this.bs = bs;
-		setUp();
+		nxtDevice = btBluetoothDevice;
 	}
 
 	/**
@@ -47,20 +49,29 @@ public class Controls extends Thread {
 	 *            bluetooth address
 	 */
 	public boolean setUp() {
+
 		boolean connected = false;
+		queue = new ConcurrentLinkedQueue<Controls.Packet>();
 		try {
+			bs = nxtDevice.createRfcommSocketToServiceRecord(UUID
+					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+
+			bs.connect();
 			dataIn = new DataInputStream(bs.getInputStream());
 			dataOut = new DataOutputStream(bs.getOutputStream());
 			connected = true;
+			if (reader.isAlive() == false) {
+				reader = new Worker();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if (dataIn == null) {
+		if (dataIn == null || dataOut == null) {
 			connected = false;
 			return connected;
 		}
-		if (!reader.isRunning) {
+		if (!reader.isAlive()) {
 			reader.start();
 		}
 		return connected;
@@ -103,7 +114,7 @@ public class Controls extends Thread {
 						reading = count < 20;// give up
 						ok = false;
 						errorCount++;
-						errorCount=0;
+						errorCount = 0;
 					}
 					if (ok) {
 						sendPosToUIThread(x);
@@ -124,14 +135,14 @@ public class Controls extends Thread {
 							}
 							dataOut.flush();
 							reading = m.response;
-							errorCount=0;
+							errorCount = 0;
 						} catch (IOException e) {
 							Log.e(TAG, " send throws exception  ", e);
 							errorCount++;
 						}
 					}
 				}
-				if(errorCount>=10){
+				if (errorCount >= 10) {
 					sendPosToUIThread("Error in socket, try reconencting");
 				}
 				if (queue.isEmpty() && reading == false) {
@@ -143,6 +154,15 @@ public class Controls extends Thread {
 					}
 				}
 			}// if reading
+			try {
+				bs.close();
+				bs = null;
+				dataIn = null;
+				dataOut = null;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}// while is running
 
 	}

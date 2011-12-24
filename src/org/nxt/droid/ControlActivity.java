@@ -3,9 +3,10 @@
  */
 package org.nxt.droid;
 
-import java.io.IOException;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -19,26 +20,49 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * @author Blaž Šnuderl
  * 
  */
 public class ControlActivity extends Activity implements SensorEventListener {
-TextView recieved;
+	TextView recieved;
+	BluetoothDevice nxtDevice = null;
+	BluetoothSocket bs = null;
+	UiMessage messageHandler;
+
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.control);
 
-		final BluetoothSocket bs = ((Application) getApplicationContext()).bs;
-		UiMessage messageHandler = new UiMessage();
-		sManager = (SensorManager) getSystemService(SENSOR_SERVICE); 
+		String deviceName = getIntent().getExtras().getString("device");
+
+		if (deviceName != null) {
+			for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter()
+					.getBondedDevices()) {
+				if (device.getName().equals(deviceName)) {
+					nxtDevice = device;
+				}
+			}
+			TextView twNaprava = (TextView) findViewById(R.id.deviceName);
+			twNaprava.setText("Naprava: " + deviceName);
+
+		}
+
+		// No device, exit
+		if (nxtDevice == null) {
+			finish();
+		}
+
+		messageHandler = new UiMessage();
+		sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
 		tv = (TextView) findViewById(R.id.textView1);
 		recieved = (TextView) findViewById(R.id.recieved);
-		control = new Controls(messageHandler, bs);
-		
+
+		control = new Controls(messageHandler, nxtDevice);
 		control.run();
 
 		Button sendButton = (Button) findViewById(R.id.send_button);
@@ -50,22 +74,32 @@ TextView recieved;
 
 			}
 		});
-		Button disconnectButton= (Button)findViewById(R.id.disconect_button);
+		Button disconnectButton = (Button) findViewById(R.id.disconect_button);
 		disconnectButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				
-				onStop();
 				control.end();
-				try {
-					bs.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				finish();
 			}
+		});
+
+		Button connectButton = (Button) findViewById(R.id.conectGumb);
+		connectButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (control.setUp()) {
+
+					CharSequence text = "Connection success";
+					Toast.makeText(getApplicationContext(), text,
+							Toast.LENGTH_SHORT).show();
+				} else {
+					CharSequence text = "Connection failed";
+					Toast.makeText(getApplicationContext(), text,
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+
 		});
 
 	}
@@ -76,7 +110,7 @@ TextView recieved;
 		@Override
 		public void handleMessage(Message msg) {
 			Log.d("Message recieved", msg.arg1 + "," + msg.arg2 + ".");
-			recieved.setText((String)msg.getData().get("vsebina"));
+			recieved.setText((String) msg.getData().get("vsebina"));
 		}
 	}
 
@@ -99,14 +133,14 @@ TextView recieved;
 		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
 			return;
 		}
-		
-		tv.setText("Os X :"+ Float.toString(event.values[2]) +"\n"+
-				"Os Y :"+ Float.toString(event.values[1]) +"\n"+
-				"Os Z :"+ Float.toString(event.values[0]));
-		
-		control.send(1,false, event.values[0],event.values[1],event.values[2]);
-		
-		
+
+		tv.setText("Os X :" + Float.toString(event.values[2]) + "\n" + "Os Y :"
+				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
+				+ Float.toString(event.values[0]));
+
+		control.send(1, false, event.values[0], event.values[1],
+				event.values[2]);
+
 	}
 
 	// when this Activity starts
@@ -127,6 +161,6 @@ TextView recieved;
 	private TextView tv;
 	// the Sensor Manager
 	private SensorManager sManager;
-	
+
 	Controls control;
 }

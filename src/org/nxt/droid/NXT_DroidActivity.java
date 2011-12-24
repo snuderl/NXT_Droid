@@ -2,26 +2,18 @@ package org.nxt.droid;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -62,22 +54,16 @@ public class NXT_DroidActivity extends Activity {
 
 				// connect
 				try {
-					BluetoothSocket bs = nxtDevice.createRfcommSocketToServiceRecord(UUID
-							.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-					bs.connect();
 
-					CharSequence text = "Connection success";
-					Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_SHORT).show();
-
-					((Application) getApplicationContext()).bs = bs;
 					Intent i = new Intent(arg1.getContext(),
 							ControlActivity.class);
+					i.putExtra("device", nxtDevice.getName());
 					startActivity(i);
 				} catch (Exception e) {
 					e.printStackTrace();
 					CharSequence text = "Connection failed";
-					Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), text,
+							Toast.LENGTH_SHORT).show();
 				}
 
 			}
@@ -114,7 +100,6 @@ public class NXT_DroidActivity extends Activity {
 		}
 
 	}
-
 
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog;
