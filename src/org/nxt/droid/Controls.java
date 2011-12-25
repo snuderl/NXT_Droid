@@ -74,6 +74,7 @@ public class Controls extends Thread {
 		if (!reader.isAlive()) {
 			reader.start();
 		}
+		updateIcon(connected);
 		return connected;
 	}
 
@@ -97,7 +98,6 @@ public class Controls extends Thread {
 		public void run() {
 			setName("RCNavComms read thread");
 			isRunning = true;
-			int errorCount = 0;
 			while (isRunning) {
 				if (reading) // reads one message at a time
 				{
@@ -110,15 +110,12 @@ public class Controls extends Thread {
 						Log.d(TAG, "data  " + x);
 					} catch (IOException e) {
 						Log.d(TAG, "connection lost");
-						count++;
-						reading = count < 20;// give up
 						ok = false;
-						errorCount++;
-						errorCount = 0;
 					}
 					if (ok) {
 						sendPosToUIThread(x);
 						reading = false;
+						updateIcon(false);
 					}
 				} else {
 					if (!queue.isEmpty()) {
@@ -135,15 +132,11 @@ public class Controls extends Thread {
 							}
 							dataOut.flush();
 							reading = m.response;
-							errorCount = 0;
 						} catch (IOException e) {
 							Log.e(TAG, " send throws exception  ", e);
-							errorCount++;
+							updateIcon(false);
 						}
 					}
-				}
-				if (errorCount >= 10) {
-					sendPosToUIThread("Error in socket, try reconencting");
 				}
 				if (queue.isEmpty() && reading == false) {
 					try {
@@ -199,11 +192,21 @@ public class Controls extends Thread {
 	private DataOutputStream dataOut;
 	private Worker reader = new Worker();
 
+	public void updateIcon(boolean connected) {
+		Bundle b = new Bundle();
+		b.putBoolean("online", connected);
+		Message message_holder = new Message();
+		message_holder.setData(b);
+		message_holder.what = 2;
+		mUIMessageHandler.sendMessage(message_holder);
+	}
+
 	public void sendPosToUIThread(String x) {
 		Bundle b = new Bundle();
 		b.putString("vsebina", x);
 		Message message_holder = new Message();
 		message_holder.setData(b);
+		message_holder.what = 1;
 		mUIMessageHandler.sendMessage(message_holder);
 	}
 

@@ -3,7 +3,6 @@
  */
 package org.nxt.droid;
 
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -19,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +31,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	BluetoothDevice nxtDevice = null;
 	BluetoothSocket bs = null;
 	UiMessage messageHandler;
+	ImageView statusImage = null;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -55,6 +56,9 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		if (nxtDevice == null) {
 			finish();
 		}
+
+		statusImage = (ImageView) findViewById(R.id.imageView1);
+		statusImage.setImageResource(R.drawable.useroffline);
 
 		messageHandler = new UiMessage();
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -109,8 +113,26 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		@Override
 		public void handleMessage(Message msg) {
-			Log.d("Message recieved", msg.arg1 + "," + msg.arg2 + ".");
-			recieved.setText((String) msg.getData().get("vsebina"));
+			switch (msg.what) {
+			case 1:
+				Log.d("Message recieved", msg.arg1 + "," + msg.arg2 + ".");
+				recieved.setText((String) msg.getData().get("vsebina"));
+				break;
+			case 2:
+				boolean online = msg.getData().getBoolean("online");
+				if (online == true) {
+					statusImage.setImageResource(R.drawable.useronline);
+				} else {
+
+					statusImage.setImageResource(R.drawable.useroffline);
+
+					CharSequence text = "Connection failed, try reconnectiong...";
+					Toast.makeText(getApplicationContext(), text,
+							Toast.LENGTH_SHORT).show();
+				}
+			default:
+				break;
+			}
 		}
 	}
 
