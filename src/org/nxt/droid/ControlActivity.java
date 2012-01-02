@@ -32,7 +32,8 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	BluetoothSocket bs = null;
 	UiMessage messageHandler;
 	ImageView statusImage = null;
-
+	CoordinateParser parser;
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
@@ -68,6 +69,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		control = new Controls(messageHandler, nxtDevice);
 		control.run();
+		parser = new CoordinateParser();
 
 		Button sendButton = (Button) findViewById(R.id.send_button);
 		sendButton.setOnClickListener(new OnClickListener() {
@@ -160,8 +162,10 @@ public class ControlActivity extends Activity implements SensorEventListener {
 				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
 				+ Float.toString(event.values[0]));
 
-		control.send(1, false, event.values[0], event.values[1],
-				event.values[2]);
+		//control.send(1, false, event.values[0], event.values[1],
+				//event.values[2]);
+		parser.send(control, event.values);
+		
 
 	}
 

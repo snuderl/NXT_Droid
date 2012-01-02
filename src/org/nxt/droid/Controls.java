@@ -20,7 +20,7 @@ import android.util.Log;
  * @author Blaž Šnuderl
  * 
  */
-public class Controls extends Thread {
+public class Controls extends Thread implements ISend {
 	Handler mUIMessageHandler;
 	BluetoothSocket bs = null;
 	BluetoothDevice nxtDevice = null;
