@@ -124,11 +124,10 @@ public class Controls extends Thread implements ISend {
 							dataOut.writeInt(m.command); // convert the enum to
 															// an
 															// integer
-
 							for (float d : m.data) // iterate over the data
 													// array
 							{
-								dataOut.writeFloat(d);
+								 dataOut.writeFloat(d);
 							}
 							dataOut.flush();
 							reading = m.response;

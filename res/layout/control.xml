@@ -40,6 +40,30 @@
             android:layout_height="wrap_content"
             android:src="@drawable/useroffline" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/naprej"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/naprej" />
+
+    <Button
+        android:id="@+id/stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop" />
+
+    <Button
+        android:id="@+id/nazaj"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nazaj" />
+
+    <Button
+        android:id="@+id/levo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/levo" />
 
     <Button
         android:id="@+id/send_button"

@@ -71,12 +71,49 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		control.run();
 		parser = new CoordinateParser();
 
+		Button stop = (Button) findViewById(R.id.stop);
+		stop.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				control.send(NXT_Commands.STOP,false);
+
+			}
+		});
+		
 		Button sendButton = (Button) findViewById(R.id.send_button);
 		sendButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				control.send(4, true, 1f);
+				control.send(NXT_Commands.ARC, false, -10f,50f);
+
+			}
+		});
+		Button naprej = (Button) findViewById(R.id.naprej);
+		naprej.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				control.send(NXT_Commands.FORWARD, false, 10f);
+
+			}
+		});
+		Button nazaj = (Button) findViewById(R.id.nazaj);
+		nazaj.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				control.send(NXT_Commands.BACKWARD, false, 10f);
+
+			}
+		});
+		Button levo = (Button) findViewById(R.id.levo);
+		levo.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				control.send(NXT_Commands.ARC, false, 10f,50f);
 
 			}
 		});
@@ -164,7 +201,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		//control.send(1, false, event.values[0], event.values[1],
 				//event.values[2]);
-		parser.send(control, event.values);
+		//parser.send(control, event.values);
 		
 
 	}

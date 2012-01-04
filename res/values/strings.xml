@@ -8,5 +8,9 @@
     <string name="disconectString">Disconnect</string>
     <string name="naprava">"Naprava: "</string>
     <string name="connect">Connect</string>
+    <string name="naprej">naprej</string>
+    <string name="nazaj">nazaj</string>
+    <string name="levo">levo</string>
+    <string name="stop">stop</string>
 
 </resources>
