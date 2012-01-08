@@ -156,6 +156,7 @@ public class Controls extends Thread implements ISend {
 				dataOut = null;
 				isRunning=false;
 				connected=false;
+				updateIcon(false);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -167,6 +168,7 @@ public class Controls extends Thread implements ISend {
 	void end() {
 		reader.isRunning = false;
 		connected=false;
+		updateIcon(false);
 	}
 
 	/**

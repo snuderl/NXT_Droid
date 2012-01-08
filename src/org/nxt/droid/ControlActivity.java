@@ -33,31 +33,6 @@ import android.widget.Toast;
  */
 
 public class ControlActivity extends Activity implements SensorEventListener {
-	public enum SPEED {
-		SLOW(1), NORMAL(3), TURBO(5);
-
-		private int speed;
-
-		private SPEED(int c) {
-			speed = c;
-		}
-
-		public int getSpeed() {
-			return speed;
-		}
-	}
-
-	TextView recieved;
-	BluetoothDevice nxtDevice = null;
-	BluetoothSocket bs = null;
-	UiMessage messageHandler;
-	ImageView statusImage = null;
-	ImageView imageSending = null;
-	CoordinateParser parser;
-	boolean sending = false;
-	SPEED speed = SPEED.SLOW;
-
-	final CharSequence[] items = { "SLOW", "NORMAL", "TURBO" };
 
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -236,4 +211,30 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	private SensorManager sManager;
 
 	Controls control;
+
+	TextView recieved;
+	BluetoothDevice nxtDevice = null;
+	BluetoothSocket bs = null;
+	UiMessage messageHandler;
+	ImageView statusImage = null;
+	ImageView imageSending = null;
+	CoordinateParser parser;
+	boolean sending = false;
+	SPEED speed = SPEED.SLOW;
+
+	final CharSequence[] items = { "SLOW", "NORMAL", "TURBO" };
+
+	public enum SPEED {
+		SLOW(1), NORMAL(3), TURBO(5);
+
+		private int speed;
+
+		private SPEED(int c) {
+			speed = c;
+		}
+
+		public int getSpeed() {
+			return speed;
+		}
+	}
 }
