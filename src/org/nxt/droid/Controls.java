@@ -25,6 +25,8 @@ public class Controls extends Thread implements ISend {
 	BluetoothSocket bs = null;
 	BluetoothDevice nxtDevice = null;
 	private String TAG = "Control";
+	boolean sending = false;
+	boolean connected = false;
 
 	ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<Packet>();
 
@@ -75,6 +77,7 @@ public class Controls extends Thread implements ISend {
 			reader.start();
 		}
 		updateIcon(connected);
+		this.connected=connected;
 		return connected;
 	}
 
@@ -127,7 +130,7 @@ public class Controls extends Thread implements ISend {
 							for (float d : m.data) // iterate over the data
 													// array
 							{
-								 dataOut.writeFloat(d);
+								dataOut.writeFloat(d);
 							}
 							dataOut.flush();
 							reading = m.response;
@@ -151,6 +154,8 @@ public class Controls extends Thread implements ISend {
 				bs = null;
 				dataIn = null;
 				dataOut = null;
+				isRunning=false;
+				connected=false;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -161,6 +166,7 @@ public class Controls extends Thread implements ISend {
 
 	void end() {
 		reader.isRunning = false;
+		connected=false;
 	}
 
 	/**
@@ -174,11 +180,13 @@ public class Controls extends Thread implements ISend {
 	 *            an array of floats built from the collection list parameters.
 	 */
 	public void send(int command, boolean response, float... data) {
-		Packet m = new Packet();
-		m.command = command;
-		m.response = response;
-		m.data = data;
-		queue.add(m);
+		if (sending) {
+			Packet m = new Packet();
+			m.command = command;
+			m.response = response;
+			m.data = data;
+			queue.add(m);
+		}
 	}
 
 	/**

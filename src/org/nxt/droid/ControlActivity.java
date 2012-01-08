@@ -4,9 +4,11 @@
 package org.nxt.droid;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -15,6 +17,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -26,14 +31,34 @@ import android.widget.Toast;
  * @author Blaž Šnuderl
  * 
  */
+
 public class ControlActivity extends Activity implements SensorEventListener {
+	public enum SPEED {
+		SLOW(1), NORMAL(3), TURBO(5);
+
+		private int speed;
+
+		private SPEED(int c) {
+			speed = c;
+		}
+
+		public int getSpeed() {
+			return speed;
+		}
+	}
+
 	TextView recieved;
 	BluetoothDevice nxtDevice = null;
 	BluetoothSocket bs = null;
 	UiMessage messageHandler;
 	ImageView statusImage = null;
+	ImageView imageSending = null;
 	CoordinateParser parser;
-	
+	boolean sending = false;
+	SPEED speed = SPEED.SLOW;
+
+	final CharSequence[] items = { "SLOW", "NORMAL", "TURBO" };
+
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
@@ -61,6 +86,9 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		statusImage = (ImageView) findViewById(R.id.imageView1);
 		statusImage.setImageResource(R.drawable.useroffline);
 
+		imageSending = (ImageView) findViewById(R.id.imageSending);
+		imageSending.setImageResource(R.drawable.useroffline);
+
 		messageHandler = new UiMessage();
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -71,66 +99,32 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		control.run();
 		parser = new CoordinateParser();
 
-		Button stop = (Button) findViewById(R.id.stop);
-		stop.setOnClickListener(new OnClickListener() {
+	}
 
-			@Override
-			public void onClick(View v) {
-				control.send(NXT_Commands.STOP,false);
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu, menu);
+		return true;
+	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.choose_speed:
+			chooseSpeed();
+			return true;
+		case R.id.toggle_control:
+			control.sending = control.sending ? false : true;
+			if (control.sending) {
+				imageSending.setImageResource(R.drawable.useronline);
+			} else {
+				imageSending.setImageResource(R.drawable.useroffline);
 			}
-		});
-		
-		Button sendButton = (Button) findViewById(R.id.send_button);
-		sendButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				control.send(NXT_Commands.ARC, false, -10f,50f);
-
-			}
-		});
-		Button naprej = (Button) findViewById(R.id.naprej);
-		naprej.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				control.send(NXT_Commands.FORWARD, false, 10f);
-
-			}
-		});
-		Button nazaj = (Button) findViewById(R.id.nazaj);
-		nazaj.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				control.send(NXT_Commands.BACKWARD, false, 10f);
-
-			}
-		});
-		Button levo = (Button) findViewById(R.id.levo);
-		levo.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				control.send(NXT_Commands.ARC, false, 10f,50f);
-
-			}
-		});
-		Button disconnectButton = (Button) findViewById(R.id.disconect_button);
-		disconnectButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				control.end();
-			}
-		});
-
-		Button connectButton = (Button) findViewById(R.id.conectGumb);
-		connectButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
+			return true;
+		case R.id.connect:
+			if (!control.connected) {
 				if (control.setUp()) {
 
 					CharSequence text = "Connection success";
@@ -141,10 +135,27 @@ public class ControlActivity extends Activity implements SensorEventListener {
 					Toast.makeText(getApplicationContext(), text,
 							Toast.LENGTH_SHORT).show();
 				}
+			} else {
+				control.end();
 			}
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
+	public void chooseSpeed() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Pick a color");
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int item) {
+				Toast.makeText(getApplicationContext(), items[item],
+						Toast.LENGTH_SHORT).show();
+				speed = SPEED.valueOf(items[item].toString());
+			}
 		});
-
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 
 	class UiMessage extends Handler {
@@ -199,10 +210,9 @@ public class ControlActivity extends Activity implements SensorEventListener {
 				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
 				+ Float.toString(event.values[0]));
 
-		//control.send(1, false, event.values[0], event.values[1],
-				//event.values[2]);
-		//parser.send(control, event.values);
-		
+		// control.send(1, false, event.values[0], event.values[1],
+		// event.values[2]);
+		parser.send(control, speed.getSpeed(), event.values);
 
 	}
 

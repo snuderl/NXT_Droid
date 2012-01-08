@@ -21,18 +21,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/conectGumb"
+
+        <TextView
+            android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/connect" />
-
-        <Button
-            android:id="@+id/disconect_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/disconectString" />
+            android:text="@string/connected" />
 
         <ImageView
             android:id="@+id/imageView1"
@@ -40,36 +34,26 @@
             android:layout_height="wrap_content"
             android:src="@drawable/useroffline" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="304dp"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/control" />
 
-    <Button
-        android:id="@+id/naprej"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/naprej" />
-
-    <Button
-        android:id="@+id/stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/stop" />
-
-    <Button
-        android:id="@+id/nazaj"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/nazaj" />
-
-    <Button
-        android:id="@+id/levo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/levo" />
+        <ImageView
+            android:id="@+id/imageSending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:src="@drawable/useroffline" />
 
-    <Button
-        android:id="@+id/send_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/posljiGumb" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/recievedTW"
