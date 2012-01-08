@@ -2,4 +2,3 @@ Lego NXT aplikacija
 
 Import to Eclipse:
 Clone repo -> New android project -> From existing sources
-Also need to add buildapth refrence to pccomms.jar
