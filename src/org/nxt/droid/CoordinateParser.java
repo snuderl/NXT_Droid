@@ -34,9 +34,8 @@ public class CoordinateParser {
 		}
 		
 		
-		send.send(1, false, forward*multiplier, steer*multiplier);
-		String s = ("Forward: "+forward +", steer: "+steer);
-		Log.d("Coordinates", s);
+		
+		send.send(NXT_Commands.ARC, false, forward*multiplier, steer*multiplier);
 	}
 
 }
