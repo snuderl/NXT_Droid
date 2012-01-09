@@ -20,9 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -203,6 +201,34 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		sManager.registerListener(this,
 				sManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
 				SensorManager.SENSOR_DELAY_GAME);
+	}
+
+	public void createMorseInput() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Title");
+		alert.setMessage("Message");
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(this);
+		alert.setView(input);
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				String value = input.getText().toString();
+				control.send(NXT_Commands.MORSE, false, value);
+			}
+		});
+
+		alert.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Canceled.
+					}
+				});
+
+		alert.show();
+
 	}
 
 	// a TextView

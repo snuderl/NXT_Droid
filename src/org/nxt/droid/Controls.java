@@ -28,7 +28,7 @@ public class Controls extends Thread implements ISend {
 	boolean sending = false;
 	boolean connected = false;
 
-	ConcurrentLinkedQueue<Packet> queue = new ConcurrentLinkedQueue<Packet>();
+	ConcurrentLinkedQueue<StringPacket> queue = new ConcurrentLinkedQueue<StringPacket>();
 
 	/**
 	 * constructor establishes call back path of the RCNavigationControl
@@ -53,7 +53,7 @@ public class Controls extends Thread implements ISend {
 	public boolean setUp() {
 
 		boolean connected = false;
-		queue = new ConcurrentLinkedQueue<Controls.Packet>();
+		queue = new ConcurrentLinkedQueue<Controls.StringPacket>();
 		try {
 			bs = nxtDevice.createRfcommSocketToServiceRecord(UUID
 					.fromString("00001101-0000-1000-8000-00805F9B34FB"));
@@ -77,7 +77,7 @@ public class Controls extends Thread implements ISend {
 			reader.start();
 		}
 		updateIcon(connected);
-		this.connected=connected;
+		this.connected = connected;
 		return connected;
 	}
 
@@ -89,7 +89,11 @@ public class Controls extends Thread implements ISend {
 	class Packet {
 		public int command;
 		public boolean response;
-		public float[] data;
+		public float[] data = null;
+	}
+
+	public class StringPacket extends Packet {
+		public String strData;
 	}
 
 	class Worker extends Thread {
@@ -123,14 +127,18 @@ public class Controls extends Thread implements ISend {
 				} else {
 					if (!queue.isEmpty()) {
 						try {
-							Packet m = queue.poll();
+							StringPacket m = queue.poll();
 							dataOut.writeInt(m.command); // convert the enum to
 															// an
 															// integer
-							for (float d : m.data) // iterate over the data
-													// array
-							{
-								dataOut.writeFloat(d);
+							if (m.data != null) {
+								for (float d : m.data) // iterate over the data
+														// array
+								{
+									dataOut.writeFloat(d);
+								}
+							} else {
+								dataOut.writeUTF(m.strData);
 							}
 							dataOut.flush();
 							reading = m.response;
@@ -154,8 +162,8 @@ public class Controls extends Thread implements ISend {
 				bs = null;
 				dataIn = null;
 				dataOut = null;
-				isRunning=false;
-				connected=false;
+				isRunning = false;
+				connected = false;
 				updateIcon(false);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -167,7 +175,7 @@ public class Controls extends Thread implements ISend {
 
 	void end() {
 		reader.isRunning = false;
-		connected=false;
+		connected = false;
 		updateIcon(false);
 	}
 
@@ -183,10 +191,20 @@ public class Controls extends Thread implements ISend {
 	 */
 	public void send(int command, boolean response, float... data) {
 		if (sending) {
-			Packet m = new Packet();
+			StringPacket m = new StringPacket();
 			m.command = command;
 			m.response = response;
 			m.data = data;
+			queue.add(m);
+		}
+	}
+
+	public void send(int command, boolean response, String data) {
+		if (sending) {
+			StringPacket m = new StringPacket();
+			m.command = command;
+			m.response = response;
+			m.strData = data;
 			queue.add(m);
 		}
 	}

@@ -3,5 +3,6 @@
 	<item android:id="@+id/choose_speed" android:title="Choose speed" />
 	<item android:id="@+id/toggle_control" android:title="Toggle control" />
 	<item android:id="@+id/connect" android:title="Connect/disconect" />
+	<item android:id="@+id/morse" android:title="Play morse code" />
 
 </menu>
