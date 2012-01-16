@@ -13,6 +13,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,13 +21,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * @author Blaž Šnuderl
+ * @author Blaï¿½ ï¿½nuderl
  * 
  */
 
@@ -72,6 +75,8 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		control.run();
 		parser = new CoordinateParser();
 
+		mprogress = (ProgressBar) findViewById(R.id.progressBar1);
+
 	}
 
 	@Override
@@ -98,16 +103,10 @@ public class ControlActivity extends Activity implements SensorEventListener {
 			return true;
 		case R.id.connect:
 			if (!control.connected) {
-				if (control.setUp()) {
 
-					CharSequence text = "Connection success";
-					Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_SHORT).show();
-				} else {
-					CharSequence text = "Connection failed";
-					Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_SHORT).show();
-				}
+				mprogress.setVisibility(View.VISIBLE);
+				new AsyncConnect().execute(control);
+
 			} else {
 				control.end();
 			}
@@ -247,6 +246,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	CoordinateParser parser;
 	boolean sending = false;
 	SPEED speed = SPEED.SLOW;
+	ProgressBar mprogress;
 
 	final CharSequence[] items = { "SLOW", "NORMAL", "TURBO" };
 
@@ -261,6 +261,31 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		public int getSpeed() {
 			return speed;
+		}
+	}
+
+	private class AsyncConnect extends AsyncTask<Controls, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Controls... params) {
+
+			Controls control = params[0];
+			boolean b =  control.setUp();
+			return b;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			mprogress.setVisibility(View.GONE);
+			if (result) {
+				CharSequence text = "Connection success";
+				Toast.makeText(getApplicationContext(), text,
+						Toast.LENGTH_SHORT).show();
+			} else {
+				CharSequence text = "Connection failed";
+				Toast.makeText(getApplicationContext(), text,
+						Toast.LENGTH_SHORT).show();
+			}
+
 		}
 	}
 }
