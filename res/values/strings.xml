@@ -15,5 +15,6 @@
     <string name="sending">Pošiljanje</string>
     <string name="control">"Controling: "</string>
     <string name="connected">"Connected: "</string>
+    <string name="nadzor">Direktni nadzor:</string>
 
 </resources>

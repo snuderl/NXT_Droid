@@ -4,5 +4,5 @@
 	<item android:id="@+id/toggle_control" android:title="Toggle control" />
 	<item android:id="@+id/connect" android:title="Connect/disconect" />
 	<item android:id="@+id/morse" android:title="Play morse code" />
-
+	<item android:id="@+id/custom" android:title="Custom command" />
 </menu>

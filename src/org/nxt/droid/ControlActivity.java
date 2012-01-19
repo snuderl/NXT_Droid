@@ -4,6 +4,7 @@
 package org.nxt.droid;
 
 import android.app.Activity;
+import static org.nxt.droid.NXT_Commands.*;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -18,11 +19,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,6 +39,7 @@ import android.widget.Toast;
  */
 
 public class ControlActivity extends Activity implements SensorEventListener {
+	boolean pauseSensor = false;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -59,17 +65,26 @@ public class ControlActivity extends Activity implements SensorEventListener {
 			finish();
 		}
 
+		Button stop = (Button) findViewById(R.id.stopButton);
+		stop.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				control.send(Packet.make(STOP, "STOP"));
+
+			}
+		});
+
 		statusImage = (ImageView) findViewById(R.id.imageView1);
 		statusImage.setImageResource(R.drawable.useroffline);
+		
+		tv = (TextView)findViewById(R.id.textView1);
 
 		imageSending = (ImageView) findViewById(R.id.imageSending);
 		imageSending.setImageResource(R.drawable.useroffline);
 
 		NXTHandler handler = new NXTHandler();
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-		tv = (TextView) findViewById(R.id.textView1);
-		recieved = (TextView) findViewById(R.id.recieved);
 
 		control = new BT(handler);
 		control.run();
@@ -92,22 +107,28 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		case R.id.choose_speed:
 			chooseSpeed();
 			return true;
-			// case R.id.toggle_control:
-			// control.sending = control.sending ? false : true;
-			// if (control.sending) {
-			// imageSending.setImageResource(R.drawable.useronline);
-			// } else {
-			// imageSending.setImageResource(R.drawable.useroffline);
-			// }
-			// return true;
+		case R.id.toggle_control:
+			pauseSensor = pauseSensor ? false : true;
+			if (!pauseSensor) {
+				imageSending.setImageResource(R.drawable.useronline);
+			} else {
+				imageSending.setImageResource(R.drawable.useroffline);
+			}
+			return true;
 		case R.id.connect:
 			if (!control.isConnected()) {
 				mprogress.setVisibility(View.VISIBLE);
 				new AsyncConnect().execute(control);
 
 			} else {
-				control.end();
+				control.disconect();
 			}
+			return true;
+		case R.id.morse:
+			createMorseInput();
+			return true;
+		case R.id.custom:
+			createCustomCommandInput();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -185,7 +206,8 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		// if sensor is unreliable, return void
-		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE
+				|| pauseSensor) {
 			return;
 		}
 
@@ -195,8 +217,28 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		// control.send(1, false, event.values[0], event.values[1],
 		// event.values[2]);
-		String content = Packet.content(event.values[0],event.values[1],event.values[2]);
-		
+
+		float forward = 0;
+		// Minus je levo, pozitivno desno;
+		float steer = 0;
+		if (event.values[2] < 45f) {
+			forward = (45 - (event.values[2] % 45)) / 10;
+		} else {
+			forward = -((event.values[2] - 45) % 45) / 10;
+		}
+
+		boolean positive = false;
+		if (event.values[1] > 0) {
+			positive = true;
+		}
+		float y = Math.abs(event.values[1]);
+		steer = (y % 45) / 10;
+		if (positive) {
+			steer *= -1;
+		}
+
+		String content = Packet.content(forward, steer);
+
 		control.send(Packet.make("Sensor", content));
 
 	}
@@ -228,7 +270,45 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				String value = input.getText().toString();
-				control.send("Morse: " + value);
+				control.send(Packet.make(MORSE, value));
+			}
+		});
+
+		alert.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Canceled.
+					}
+				});
+
+		alert.show();
+
+	}
+	
+	public void createCustomCommandInput() {
+		
+
+		
+		LayoutInflater factory = LayoutInflater.from(this);  
+		
+		final View textEntryView = factory.inflate(R.layout.twoinputs, null);
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this); 
+
+        alert.setTitle("Custom command"); 
+        alert.setMessage("Enter command and data:"); 
+        // Set an EditText view to get user input  
+        alert.setView(textEntryView); 
+        AlertDialog loginPrompt = alert.create();
+
+        final EditText input1 = (EditText) textEntryView.findViewById(R.id.editText1);
+        final EditText input2 = (EditText) textEntryView.findViewById(R.id.editText2);
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				String command = input1.getText().toString();
+				String data = input2.getText().toString(); 
+				control.send(Packet.make(command, data));
 			}
 		});
 

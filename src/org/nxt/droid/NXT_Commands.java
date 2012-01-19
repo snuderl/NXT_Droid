@@ -1,14 +1,15 @@
 package org.nxt.droid;
 
 /**
- * @author Blaž Šnuderl
+ * @author Blaï¿½ ï¿½nuderl
  * 
  */
-public interface NXT_Commands {
-	public final int FORWARD = 0;
-	public final int BACKWARD = 1;
-	public final int STOP = 2;
-	public final int ARC = 3;
-	public final int STEER = 4;
-	public final int MORSE = 5;
+public class NXT_Commands {
+	public static final String FORWARD = "FORWARD";
+	public static final String BACKWARD = "BACKWARD";
+	public static final String STOP = "STOP";
+	public static final String ARC = "ARC";
+	public static final String STEER = "STEER";
+	public static final String MORSE = "MORSE";
+	public static final String KEEPALIVE = "KeepAlive";
 }

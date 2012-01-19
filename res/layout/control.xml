@@ -39,12 +39,12 @@
         android:id="@+id/linearLayout2"
         android:layout_width="304dp"
         android:layout_height="wrap_content" >
-
+
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/control" />
+            android:text="@string/nadzor" />
 
         <ImageView
             android:id="@+id/imageSending"
@@ -54,18 +54,6 @@
             android:src="@drawable/useroffline" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/recievedTW"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/recievedString" />
-
-    <TextView
-        android:id="@+id/recieved"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
 
     <ProgressBar
         android:id="@+id/progressBar1"
@@ -73,5 +61,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop" />
 
 </LinearLayout>

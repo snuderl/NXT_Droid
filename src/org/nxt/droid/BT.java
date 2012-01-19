@@ -6,6 +6,8 @@ package org.nxt.droid;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -25,6 +27,7 @@ public class BT extends Thread {
 	BluetoothSocket bs = null;
 	BluetoothDevice nxtDevice = null;
 	private String TAG = "BTClass";
+	Timer keepAlive;
 
 	public boolean isConnected() {
 		if (bs != null && dataIn != null && dataOut != null)
@@ -79,6 +82,8 @@ public class BT extends Thread {
 		if (!reader.isAlive()) {
 			reader.start();
 		}
+		keepAlive = new Timer();
+		keepAlive.schedule(new KeepAlive(), 100, 500);
 		return connected;
 	}
 
@@ -118,39 +123,45 @@ public class BT extends Thread {
 							String m = queue.poll();
 							dataOut.writeUTF(m);
 							dataOut.flush();
+							count=0;
 						} catch (IOException e) {
 							Log.e(TAG, "Execption while sending", e);
+							isRunning=false;
+						}
+					}
+					else {
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
 				}
-				if (queue.isEmpty() && reading == false) {
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}// if reading
-			try {
-				bs.close();
-				bs = null;
-				dataIn = null;
-				dataOut = null;
-				isRunning = false;
-				callback.onDisconnect();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
-		}// while is running
+			end();
+		}
+
 
 	}
-
-	void end() {
+	
+	void disconect() {
 		reader.isRunning = false;
 		reader.reading = false;
-		callback.onDisconnect();
+	}
+
+	private void end() {
+		try {
+			keepAlive.cancel();
+			bs.close();
+			bs = null;
+			dataIn = null;
+			dataOut = null;
+			callback.onDisconnect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -176,4 +187,13 @@ public class BT extends Thread {
 	 */
 	private DataOutputStream dataOut;
 	private Worker reader = new Worker();
+	
+	class KeepAlive extends TimerTask{
+
+		@Override
+		public void run() {
+			send(Packet.make("KeepAlive", "KeepAlive"));			
+		}
+		
+	}
 }
