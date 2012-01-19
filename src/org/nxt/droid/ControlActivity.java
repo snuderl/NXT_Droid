@@ -65,15 +65,14 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		imageSending = (ImageView) findViewById(R.id.imageSending);
 		imageSending.setImageResource(R.drawable.useroffline);
 
-		messageHandler = new UiMessage();
+		NXTHandler handler = new NXTHandler();
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
 		tv = (TextView) findViewById(R.id.textView1);
 		recieved = (TextView) findViewById(R.id.recieved);
 
-		control = new Controls(messageHandler, nxtDevice);
+		control = new BT(handler);
 		control.run();
-		parser = new CoordinateParser();
 
 		mprogress = (ProgressBar) findViewById(R.id.progressBar1);
 
@@ -93,17 +92,16 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		case R.id.choose_speed:
 			chooseSpeed();
 			return true;
-		case R.id.toggle_control:
-			control.sending = control.sending ? false : true;
-			if (control.sending) {
-				imageSending.setImageResource(R.drawable.useronline);
-			} else {
-				imageSending.setImageResource(R.drawable.useroffline);
-			}
-			return true;
+			// case R.id.toggle_control:
+			// control.sending = control.sending ? false : true;
+			// if (control.sending) {
+			// imageSending.setImageResource(R.drawable.useronline);
+			// } else {
+			// imageSending.setImageResource(R.drawable.useroffline);
+			// }
+			// return true;
 		case R.id.connect:
-			if (!control.connected) {
-
+			if (!control.isConnected()) {
 				mprogress.setVisibility(View.VISIBLE);
 				new AsyncConnect().execute(control);
 
@@ -118,7 +116,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 	public void chooseSpeed() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Pick a color");
+		builder.setTitle("Choose speed");
 		builder.setItems(items, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int item) {
 				Toast.makeText(getApplicationContext(), items[item],
@@ -130,31 +128,44 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		alert.show();
 	}
 
-	class UiMessage extends Handler {
+	class NXTHandler extends Handler implements IBTUser {
+		final int message = 1, disconnect = 2;
 		float[] pos;
 
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case 1:
-				Log.d("Message recieved", msg.arg1 + "," + msg.arg2 + ".");
-				recieved.setText((String) msg.getData().get("vsebina"));
+				String recived = (String) msg.getData().get("vsebina");
+				Log.d("NXTHANDLER", "Recived: " + recived);
 				break;
 			case 2:
-				boolean online = msg.getData().getBoolean("online");
-				if (online == true) {
-					statusImage.setImageResource(R.drawable.useronline);
-				} else {
+				statusImage.setImageResource(R.drawable.useroffline);
 
-					statusImage.setImageResource(R.drawable.useroffline);
-
-					CharSequence text = "Connection failed, try reconnectiong...";
-					Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_SHORT).show();
-				}
-			default:
+				CharSequence text = "Connection failed, try reconnectiong...";
+				Toast.makeText(getApplicationContext(), text,
+						Toast.LENGTH_SHORT).show();
 				break;
 			}
+		}
+
+		@Override
+		public void recived(String message) {
+			Bundle b = new Bundle();
+			b.putString("content", message);
+
+			Message m = new Message();
+			m.what = this.message;
+			m.setData(b);
+
+		}
+
+		@Override
+		public void onDisconnect() {
+			Message m = new Message();
+			m.what = disconnect;
+			this.sendMessage(m);
+
 		}
 	}
 
@@ -184,7 +195,9 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		// control.send(1, false, event.values[0], event.values[1],
 		// event.values[2]);
-		parser.send(control, speed.getSpeed(), event.values);
+		String content = Packet.content(event.values[0],event.values[1],event.values[2]);
+		
+		control.send(Packet.make("Sensor", content));
 
 	}
 
@@ -215,7 +228,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				String value = input.getText().toString();
-				control.send(NXT_Commands.MORSE, false, value);
+				control.send("Morse: " + value);
 			}
 		});
 
@@ -235,15 +248,13 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	// the Sensor Manager
 	private SensorManager sManager;
 
-	Controls control;
+	BT control;
 
 	TextView recieved;
 	BluetoothDevice nxtDevice = null;
 	BluetoothSocket bs = null;
-	UiMessage messageHandler;
 	ImageView statusImage = null;
 	ImageView imageSending = null;
-	CoordinateParser parser;
 	boolean sending = false;
 	SPEED speed = SPEED.SLOW;
 	ProgressBar mprogress;
@@ -264,12 +275,12 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		}
 	}
 
-	private class AsyncConnect extends AsyncTask<Controls, Void, Boolean> {
+	private class AsyncConnect extends AsyncTask<BT, Void, Boolean> {
 		@Override
-		protected Boolean doInBackground(Controls... params) {
+		protected Boolean doInBackground(BT... params) {
 
-			Controls control = params[0];
-			boolean b =  control.setUp();
+			BT control = params[0];
+			boolean b = control.connect(nxtDevice);
 			return b;
 		}
 
@@ -280,10 +291,12 @@ public class ControlActivity extends Activity implements SensorEventListener {
 				CharSequence text = "Connection success";
 				Toast.makeText(getApplicationContext(), text,
 						Toast.LENGTH_SHORT).show();
+				statusImage.setImageResource(R.drawable.useronline);
 			} else {
 				CharSequence text = "Connection failed";
 				Toast.makeText(getApplicationContext(), text,
 						Toast.LENGTH_SHORT).show();
+				statusImage.setImageResource(R.drawable.useroffline);
 			}
 
 		}
