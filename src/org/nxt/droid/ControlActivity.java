@@ -77,14 +77,16 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		statusImage = (ImageView) findViewById(R.id.imageView1);
 		statusImage.setImageResource(R.drawable.useroffline);
-		
-		tv = (TextView)findViewById(R.id.textView1);
+
+		tv = (TextView) findViewById(R.id.textView1);
 
 		imageSending = (ImageView) findViewById(R.id.imageSending);
 		imageSending.setImageResource(R.drawable.useroffline);
 
 		NXTHandler handler = new NXTHandler();
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+		tv = (TextView) findViewById(R.id.textView1);
 
 		control = new BT(handler);
 		control.run();
@@ -215,9 +217,6 @@ public class ControlActivity extends Activity implements SensorEventListener {
 				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
 				+ Float.toString(event.values[0]));
 
-		// control.send(1, false, event.values[0], event.values[1],
-		// event.values[2]);
-
 		float forward = 0;
 		// Minus je levo, pozitivno desno;
 		float steer = 0;
@@ -239,7 +238,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 
 		String content = Packet.content(forward, steer);
 
-		control.send(Packet.make("Sensor", content));
+		control.send(Packet.make(ARC, content));
 
 	}
 
@@ -284,30 +283,28 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		alert.show();
 
 	}
-	
-	public void createCustomCommandInput() {
-		
 
-		
-		LayoutInflater factory = LayoutInflater.from(this);  
-		
+	public void createCustomCommandInput() {
+
+		LayoutInflater factory = LayoutInflater.from(this);
+
 		final View textEntryView = factory.inflate(R.layout.twoinputs, null);
 
-        AlertDialog.Builder alert = new AlertDialog.Builder(this); 
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Custom command"); 
-        alert.setMessage("Enter command and data:"); 
-        // Set an EditText view to get user input  
-        alert.setView(textEntryView); 
-        AlertDialog loginPrompt = alert.create();
-
-        final EditText input1 = (EditText) textEntryView.findViewById(R.id.editText1);
-        final EditText input2 = (EditText) textEntryView.findViewById(R.id.editText2);
+		alert.setTitle("Custom command");
+		alert.setMessage("Enter command and data:");
+		// Set an EditText view to get user input
+		alert.setView(textEntryView);
+		final EditText input1 = (EditText) textEntryView
+				.findViewById(R.id.editText1);
+		final EditText input2 = (EditText) textEntryView
+				.findViewById(R.id.editText2);
 
 		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				String command = input1.getText().toString();
-				String data = input2.getText().toString(); 
+				String data = input2.getText().toString();
 				control.send(Packet.make(command, data));
 			}
 		});

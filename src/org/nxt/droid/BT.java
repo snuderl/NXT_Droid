@@ -123,13 +123,11 @@ public class BT extends Thread {
 							String m = queue.poll();
 							dataOut.writeUTF(m);
 							dataOut.flush();
-							count=0;
 						} catch (IOException e) {
 							Log.e(TAG, "Execption while sending", e);
-							isRunning=false;
+							isRunning = false;
 						}
-					}
-					else {
+					} else {
 						try {
 							Thread.sleep(10);
 						} catch (InterruptedException e) {
@@ -142,26 +140,17 @@ public class BT extends Thread {
 			end();
 		}
 
-
 	}
-	
+
 	void disconect() {
 		reader.isRunning = false;
 		reader.reading = false;
 	}
 
-	private void end() {
-		try {
-			keepAlive.cancel();
-			bs.close();
-			bs = null;
-			dataIn = null;
-			dataOut = null;
-			callback.onDisconnect();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	void end() {
+		reader.isRunning = false;
+		reader.reading = false;
+		callback.onDisconnect();
 	}
 
 	/**
@@ -187,13 +176,13 @@ public class BT extends Thread {
 	 */
 	private DataOutputStream dataOut;
 	private Worker reader = new Worker();
-	
-	class KeepAlive extends TimerTask{
+
+	class KeepAlive extends TimerTask {
 
 		@Override
 		public void run() {
-			send(Packet.make("KeepAlive", "KeepAlive"));			
+			send(Packet.make("KeepAlive", "KeepAlive"));
 		}
-		
+
 	}
 }
