@@ -1,37 +1,37 @@
-/**
- * 
- */
-package org.nxt.droid;
-
-/**
- * @author Blaž Šnuderl
- * 
- */
-public class CoordinateParser {
-
-	public void send(ISend send, int multiplier, float... params) {
-
-		float forward = 0;
-		// Minus je levo, pozitivno desno;
-		float steer = 0;
-		if (params[2] < 45f) {
-			forward = (45 - (params[2] % 45)) / 10;
-		} else {
-			forward = -((params[2] - 45) % 45) / 10;
-		}
-
-		boolean positive = false;
-		if (params[1] > 0) {
-			positive = true;
-		}
-		float y = Math.abs(params[1]);
-		steer = (y % 45) / 10;
-		if (positive) {
-			steer *= -1;
-		}
-
-		send.send(NXT_Commands.ARC, false, forward * multiplier, steer
-				* multiplier);
-	}
-
-}
+///**
+// * 
+// */
+//package org.nxt.droid;
+//
+///**
+// * @author Blaï¿½ ï¿½nuderl
+// * 
+// */
+//public class CoordinateParser {
+//
+//	public void send(ISend send, int multiplier, float... params) {
+//
+//		float forward = 0;
+//		// Minus je levo, pozitivno desno;
+//		float steer = 0;
+//		if (params[2] < 45f) {
+//			forward = (45 - (params[2] % 45)) / 10;
+//		} else {
+//			forward = -((params[2] - 45) % 45) / 10;
+//		}
+//
+//		boolean positive = false;
+//		if (params[1] > 0) {
+//			positive = true;
+//		}
+//		float y = Math.abs(params[1]);
+//		steer = (y % 45) / 10;
+//		if (positive) {
+//			steer *= -1;
+//		}
+//
+//		send.send(NXT_Commands.ARC, false, forward * multiplier, steer
+//				* multiplier);
+//	}
+//
+//}
