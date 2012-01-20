@@ -83,7 +83,7 @@ public class BT extends Thread {
 			reader.start();
 		}
 		keepAlive = new Timer();
-		keepAlive.schedule(new KeepAlive(), 100, 500);
+		keepAlive.schedule(new KeepAlive(), 100, 1000);
 		return connected;
 	}
 

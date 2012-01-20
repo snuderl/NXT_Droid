@@ -75,6 +75,16 @@ public class ControlActivity extends Activity implements SensorEventListener {
 			}
 		});
 
+		Button claw = (Button) findViewById(R.id.claws);
+		claw.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				control.send(Packet.make("CLAWS", "CLAWS"));
+
+			}
+		});
+
 		statusImage = (ImageView) findViewById(R.id.imageView1);
 		statusImage.setImageResource(R.drawable.useroffline);
 
@@ -196,7 +206,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	@Override
 	protected void onStop() {
 		// unregister the sensor listener
-		sManager.unregisterListener(this);
+		//sManager.unregisterListener(this);
 		super.onStop();
 	}
 
@@ -208,8 +218,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		// if sensor is unreliable, return void
-		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE
-				|| pauseSensor) {
+		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
 			return;
 		}
 
@@ -217,28 +226,32 @@ public class ControlActivity extends Activity implements SensorEventListener {
 				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
 				+ Float.toString(event.values[0]));
 
-		float forward = 0;
-		// Minus je levo, pozitivno desno;
-		float steer = 0;
-		if (event.values[2] < 45f) {
-			forward = (45 - (event.values[2] % 45)) / 10;
-		} else {
-			forward = -((event.values[2] - 45) % 45) / 10;
-		}
+		if (!pauseSensor) {
+			float forward = 0;
+			// Minus je levo, pozitivno desno;
+			float steer = 0;
+			if (event.values[2] < 45f) {
+				forward = (45 - (event.values[2] % 45)) / 10;
+			} else if(event.values[2]<90){
+				float abs = Math.abs(event.values[2]);
+				abs = -(45+(90 - abs));
+			}
 
-		boolean positive = false;
-		if (event.values[1] > 0) {
-			positive = true;
-		}
-		float y = Math.abs(event.values[1]);
-		steer = (y % 45) / 10;
-		if (positive) {
-			steer *= -1;
-		}
+			float z = event.values[0];
+			if(!(z>100 && z<110)){
+				if(z<100){
+					steer = -(80-((z-20) / 10));
+				}
+				else{
+					steer = (z-110)/10;
+				}
+			}
+			
 
-		String content = Packet.content(forward, steer);
+			String content = Packet.content(forward * speed.speed, steer * 10);
 
-		control.send(Packet.make(ARC, content));
+			control.send(Packet.make(STEER, content));
+		}
 
 	}
 
