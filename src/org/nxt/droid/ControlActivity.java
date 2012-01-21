@@ -4,6 +4,7 @@
 package org.nxt.droid;
 
 import android.app.Activity;
+import static java.lang.Math.abs;
 import static org.nxt.droid.NXT_Commands.*;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -38,13 +39,13 @@ import android.widget.Toast;
  */
 
 public class ControlActivity extends Activity implements SensorEventListener {
-	boolean pauseSensor = false;
+	boolean pauseSensor = true;
 
 	protected void onCreate(Bundle savedInstanceState) {
-			
+
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.control);
 		findViewById(R.id.stopButton).getRootView().setKeepScreenOn(true);
 
@@ -152,7 +153,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
 	public void calibrate() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Put your device into neutral position.");
@@ -161,11 +162,14 @@ public class ControlActivity extends Activity implements SensorEventListener {
 				String text = "Calibration failed.";
 				if (orientation != null) {
 					float z = orientation[0];
-					orientationSpeedBase  = orientation[2];
+					orientationSpeedBase = orientation[2];
 					orientationSteerBase = z;
-					text = "Calibrated successfully.\nX: "+orientationSpeedBase+"\nZ: "+orientationSteerBase;
+					text = "Calibrated successfully.\nX: "
+							+ orientationSpeedBase + "\nZ: "
+							+ orientationSteerBase;
 				}
-				Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), text,
+						Toast.LENGTH_SHORT).show();
 			}
 		});
 		AlertDialog alert = builder.create();
@@ -174,7 +178,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	}
 
 	public void chooseSpeed() {
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Choose speed");
 		builder.setItems(items, new DialogInterface.OnClickListener() {
@@ -246,7 +250,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
 		// if sensor is unreliable, return void
 		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
-			Log.d("Sensor","Unrealiable sensor");
+			Log.d("Sensor", "Unrealiable sensor");
 			return;
 		}
 
@@ -254,38 +258,53 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		tv.setText("Os X :" + Float.toString(event.values[2]) + "\n" + "Os Y :"
 				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
 				+ Float.toString(event.values[0]));
+		
+		calculateSteering(event.values[2], event.values[0], event.values[1]);
+	}
+	
+	public void calculateSteering(float x, float z,float y) {
+		float forward = 0;
+		float maxSpeed = 45;
+		// Minus je levo, pozitivno desno;
+		float steer = 0;
+		if(y>abs(100)) {
+			x = 90 + (90 - x);
+		}
+		if (x < orientationSpeedBase) {
+			forward = (orientationSpeedBase - x);
+		} else {
+			forward = orientationSpeedBase - x;
+		}
+		forward = getNumberInBounds(forward, maxSpeed);
+
+		// Max steer
+		float maxSteer = 90;
+
+		float dist1 = (z - orientationSteerBase);
+		float dist2 = (360f - z + orientationSteerBase);
+		if (abs(dist1) < abs(dist2)) {
+			z = dist1;
+		} else {
+			z = -dist2;
+		}
+		steer = getNumberInBounds(z, maxSteer);
+		steerView.setText("Steer: " + steer + ".\n Speed: " + forward);
 
 		if (!pauseSensor) {
-			float forward = 0;
-			// Minus je levo, pozitivno desno;
-			float steer = 0;
-			float x= event.values[2];
-			if(x < orientationSpeedBase) {
-				forward = (orientationSpeedBase-x);
-			}
-			else {
-				forward = orientationSpeedBase-x;
-			}
-
-			float z = event.values[0];
-			if(z < orientationSteerBase) {
-				steer = (orientationSteerBase-z);
-			}
-			else {
-				steer = -(orientationSteerBase-z);
-			}
-			if(steer<3&&steer>-3) {
-				steer=0;
-			}
-			
-			steerView.setText("Steer: " + steer + ".\n Speed: " + forward
-					* speed.speed);
 
 			String content = Packet.content(forward * speed.speed, steer);
 
 			control.send(Packet.make(STEER, content));
 		}
 
+	}
+	
+	public float getNumberInBounds(float number, float bound) {
+		if (number < 0) {
+			return  Math.max(-bound, number);
+		} else {
+			return  Math.min(bound, number);
+		}
 	}
 
 	// when this Activity starts
