@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="ControlActivity" android:screenOrientation="landscape" android:configChanges="keyboardHidden|orientation">
+        <activity android:name="ControlActivity" android:keepScreenOn="true" android:screenOrientation="landscape" android:configChanges="keyboardHidden|orientation">
         </activity>
     </application>
 

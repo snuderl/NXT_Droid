@@ -27,7 +27,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -89,6 +88,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		statusImage.setImageResource(R.drawable.useroffline);
 
 		tv = (TextView) findViewById(R.id.textView1);
+		steerView = (TextView) findViewById(R.id.textView4);
 
 		imageSending = (ImageView) findViewById(R.id.imageSending);
 		imageSending.setImageResource(R.drawable.useroffline);
@@ -142,12 +142,36 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		case R.id.custom:
 			createCustomCommandInput();
 			return true;
+		case R.id.calibrate:
+			calibrate();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
+	
+	public void calibrate() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Put your device into neutral position.");
+		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				String text = "Calibration failed.";
+				if (orientation != null) {
+					float z = orientation[0];
+					orientationSpeedBase  = orientation[2];
+					orientationSteerBase = z;
+					text = "Calibrated successfully.\nX: "+orientationSpeedBase+"\nZ: "+orientationSteerBase;
+				}
+				Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
+
+	}
 
 	public void chooseSpeed() {
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Choose speed");
 		builder.setItems(items, new DialogInterface.OnClickListener() {
@@ -206,7 +230,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	@Override
 	protected void onStop() {
 		// unregister the sensor listener
-		//sManager.unregisterListener(this);
+		sManager.unregisterListener(this);
 		super.onStop();
 	}
 
@@ -219,9 +243,11 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
 		// if sensor is unreliable, return void
 		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+			Log.d("Sensor","Unrealiable sensor");
 			return;
 		}
 
+		orientation = event.values;
 		tv.setText("Os X :" + Float.toString(event.values[2]) + "\n" + "Os Y :"
 				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
 				+ Float.toString(event.values[0]));
@@ -230,25 +256,29 @@ public class ControlActivity extends Activity implements SensorEventListener {
 			float forward = 0;
 			// Minus je levo, pozitivno desno;
 			float steer = 0;
-			if (event.values[2] < 45f) {
-				forward = (45 - (event.values[2] % 45)) / 10;
-			} else if(event.values[2]<90){
-				float abs = Math.abs(event.values[2]);
-				abs = -(45+(90 - abs));
+			float x= event.values[2];
+			if(x < orientationSpeedBase) {
+				forward = (orientationSpeedBase-x);
+			}
+			else {
+				forward = orientationSpeedBase-x;
 			}
 
 			float z = event.values[0];
-			if(!(z>100 && z<110)){
-				if(z<100){
-					steer = -(80-((z-20) / 10));
-				}
-				else{
-					steer = (z-110)/10;
-				}
+			if(z < orientationSteerBase) {
+				steer = (orientationSteerBase-z);
+			}
+			else {
+				steer = -(orientationSteerBase-z);
+			}
+			if(steer<3&&steer>-3) {
+				steer=0;
 			}
 			
+			steerView.setText("Steer: " + steer + ".\n Speed: " + forward
+					* speed.speed);
 
-			String content = Packet.content(forward * speed.speed, steer * 10);
+			String content = Packet.content(forward * speed.speed, steer);
 
 			control.send(Packet.make(STEER, content));
 		}
@@ -348,19 +378,23 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	boolean sending = false;
 	SPEED speed = SPEED.SLOW;
 	ProgressBar mprogress;
+	TextView steerView;
+	float[] orientation = null;
+	float orientationSpeedBase = 45;
+	float orientationSteerBase = 90;
 
 	final CharSequence[] items = { "SLOW", "NORMAL", "TURBO" };
 
 	public enum SPEED {
-		SLOW(1), NORMAL(3), TURBO(5);
+		SLOW(0.25f), NORMAL(0.5f), TURBO(1);
 
-		private int speed;
+		private float speed;
 
-		private SPEED(int c) {
+		private SPEED(float c) {
 			speed = c;
 		}
 
-		public int getSpeed() {
+		public float getSpeed() {
 			return speed;
 		}
 	}
