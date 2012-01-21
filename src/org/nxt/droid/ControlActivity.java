@@ -41,9 +41,12 @@ public class ControlActivity extends Activity implements SensorEventListener {
 	boolean pauseSensor = false;
 
 	protected void onCreate(Bundle savedInstanceState) {
+			
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.control);
+		findViewById(R.id.stopButton).getRootView().setKeepScreenOn(true);
 
 		String deviceName = getIntent().getExtras().getString("device");
 
@@ -297,6 +300,7 @@ public class ControlActivity extends Activity implements SensorEventListener {
 		sManager.registerListener(this,
 				sManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
 				SensorManager.SENSOR_DELAY_GAME);
+
 	}
 
 	public void createMorseInput() {
