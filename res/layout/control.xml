@@ -1,95 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/controllayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/ozadje"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <LinearLayout
-            android:id="@+id/linearLayout4"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" >
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/deviceName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/naprava" />
-
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:text="TextView" />
-
-    </LinearLayout>
-
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/steer1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="18dp"
+        android:text="Steer"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/connected" />
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/useroffline" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="304dp"
-        android:layout_height="wrap_content" >
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/nadzor" />
-
-        <ImageView
-            android:id="@+id/imageSending"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:src="@drawable/useroffline" />
-
-    </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/progressBar1"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible" />
-
     <Button
-        android:id="@+id/stopButton"
-        android:layout_width="wrap_content"
+        android:id="@+id/btnStop"
+        android:layout_width="124px"
         android:layout_height="wrap_content"
-        android:text="@string/stop" />
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="Stop" />
+
     <Button
-        android:id="@+id/claws"
-        android:layout_width="wrap_content"
+        android:id="@+id/btnClaws"
+        android:layout_width="125px"
         android:layout_height="wrap_content"
-        android:text="Claws" />
-</LinearLayout>
+        android:layout_alignBaseline="@+id/btnStop"
+        android:layout_alignBottom="@+id/btnStop"
+        android:layout_alignParentLeft="true"
+        android:text="Klešče" />
+
+
+</RelativeLayout>

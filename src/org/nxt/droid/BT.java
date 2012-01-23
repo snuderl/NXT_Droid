@@ -97,7 +97,6 @@ public class BT extends Thread {
 		}
 		keepAlive = new Timer();
 		keepAlive.schedule(new KeepAlive(), 100, 1000);
-		callback.onConnect(connected);
 		return connected;
 	}
 

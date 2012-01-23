@@ -12,6 +12,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,6 +30,7 @@ public class Tab extends TabActivity {
 
 	private TabHost mTabHost;
 	private BluetoothDevice nxtDevice;
+	private TabHandler handler;
 	private ProgressDialog mProgressBar;
 
 	@Override
@@ -51,6 +54,7 @@ public class Tab extends TabActivity {
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
+
 	final CharSequence[] items = { "SLOW", "NORMAL", "TURBO" };
 
 	public enum SPEED {
@@ -86,7 +90,8 @@ public class Tab extends TabActivity {
 			if (!BT.getBT().isConnected()) {
 
 				Log.d("Tag", "Connecting");
-				mProgressBar = ProgressDialog.show(this, "","Connecting...",true);
+				mProgressBar = ProgressDialog.show(this, "", "Connecting...",
+						true);
 				new AsyncConnect().execute(BT.getBT());
 
 			} else {
@@ -169,6 +174,9 @@ public class Tab extends TabActivity {
 		super.onCreate(savedInstanceState);
 		// construct the tabhost
 		setContentView(R.layout.tablayout);
+		
+		handler= new TabHandler();
+		BTManager.getManager().registerHandler(handler);
 
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
 		mTabHost.getRootView().setKeepScreenOn(true);
@@ -181,7 +189,6 @@ public class Tab extends TabActivity {
 		setupTab(new TextView(this), "Gyro", intent);
 		intent = new Intent().setClass(this, JoystickControlActivity.class);
 		setupTab(new TextView(this), "Jostick", intent);
-
 
 		if (deviceName != null) {
 			for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter()
@@ -197,6 +204,13 @@ public class Tab extends TabActivity {
 		if (nxtDevice == null) {
 			finish();
 		}
+	}
+	
+	@Override
+	protected void onStop() {
+		BT.getBT().end();
+		BTManager.getManager().unregisterHandler(handler);
+		super.onStop();
 	}
 
 	private void setupTab(final View view, final String tag, Intent i) {
@@ -228,6 +242,7 @@ public class Tab extends TabActivity {
 		@Override
 		protected void onPostExecute(Boolean result) {
 			mProgressBar.cancel();
+			BTManager.getManager().onConnect(result);
 			if (result) {
 				CharSequence text = "Connection success";
 				Toast.makeText(getApplicationContext(), text,
@@ -238,6 +253,17 @@ public class Tab extends TabActivity {
 						Toast.LENGTH_SHORT).show();
 			}
 
+		}
+	}
+
+	private class TabHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case 2:
+				Toast.makeText(getApplicationContext(), "Connection failed, try reconnecting...", Toast.LENGTH_SHORT).show();
+				break;
+			}
 		}
 	}
 
