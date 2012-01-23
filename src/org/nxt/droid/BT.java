@@ -13,13 +13,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
 /**
- * @author Bla� �nuderl
+ * @author BlaZ Snuderl
  * 
  */
 public class BT extends Thread {
@@ -28,6 +25,15 @@ public class BT extends Thread {
 	BluetoothDevice nxtDevice = null;
 	private String TAG = "BTClass";
 	Timer keepAlive;
+	private static BT singleton = null;
+
+	public static BT getBT() {
+		if (singleton == null) {
+			singleton = new BT(BTManager.getManager());
+			singleton.run();
+		}
+		return singleton;
+	}
 
 	public boolean isConnected() {
 		if (bs != null && dataIn != null && dataOut != null)
@@ -35,26 +41,27 @@ public class BT extends Thread {
 		return false;
 	}
 
+	public void setCallback(IBTUser callback) {
+		this.callback = callback;
+		if (callback == null) {
+			this.callback = new IBTUser() {
+				@Override
+				public void recived(String message) {
+				}
+
+				@Override
+				public void onDisconnect() {
+				}
+			};
+		}
+	}
+
 	ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<String>();
 
-	/**
-	 * constructor establishes call back path of the RCNavigationControl
-	 * 
-	 * @param mUIMessageHandler
-	 * @param control
-	 */
-	public BT(IBTUser callback) {
+	private BT(IBTUser callback) {
 		this.callback = callback;
 	}
 
-	/**
-	 * connects to NXT using Bluetooth
-	 * 
-	 * @param name
-	 *            of NXT
-	 * @param address
-	 *            bluetooth address
-	 */
 	public boolean connect(BluetoothDevice device) {
 		nxtDevice = device;
 
@@ -87,11 +94,6 @@ public class BT extends Thread {
 		return connected;
 	}
 
-	/**
-	 * inner class to monitor for an incoming message after a command has been
-	 * sent <br>
-	 * calls showRobotPosition() on the controller
-	 */
 	class Worker extends Thread {
 
 		public boolean reading = false;
@@ -138,6 +140,18 @@ public class BT extends Thread {
 				}
 			}
 			end();
+			try {
+				dataIn.close();
+				dataOut.close();
+				bs.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			dataIn = null;
+			dataOut = null;
+			bs = null;
+			keepAlive.cancel();
 		}
 
 	}
@@ -153,27 +167,11 @@ public class BT extends Thread {
 		callback.onDisconnect();
 	}
 
-	/**
-	 * sends a command with a variable number of float parameters. see
-	 * http://java.sun.com/docs/books/tutorial/java/javaOO/arguments.html the
-	 * section on Arbitrary Number of Arguments
-	 * 
-	 * @param c
-	 *            a Command enum
-	 * @param data
-	 *            an array of floats built from the collection list parameters.
-	 */
 	public void send(String message) {
 		queue.add(message);
 	}
 
-	/**
-	 * used by reader
-	 */
 	private DataInputStream dataIn;
-	/**
-	 * used by send()
-	 */
 	private DataOutputStream dataOut;
 	private Worker reader = new Worker();
 

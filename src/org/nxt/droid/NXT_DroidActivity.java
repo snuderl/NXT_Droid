@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -53,18 +54,10 @@ public class NXT_DroidActivity extends Activity {
 				nxtDevice = bondedDevices.get(arg2);
 
 				// connect
-				try {
-
 					Intent i = new Intent(arg1.getContext(),
-							ControlActivity.class);
+							Tab.class);
 					i.putExtra("device", nxtDevice.getName());
 					startActivity(i);
-				} catch (Exception e) {
-					e.printStackTrace();
-					CharSequence text = "Connection failed";
-					Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_SHORT).show();
-				}
 
 			}
 		});
