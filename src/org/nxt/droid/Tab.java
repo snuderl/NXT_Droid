@@ -19,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -183,7 +182,6 @@ public class Tab extends TabActivity {
 		intent = new Intent().setClass(this, JoystickControlActivity.class);
 		setupTab(new TextView(this), "Jostick", intent);
 
-		mTabHost.setCurrentTab(0);
 
 		if (deviceName != null) {
 			for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter()

@@ -7,7 +7,6 @@ import android.app.Activity;
 import static java.lang.Math.abs;
 import static org.nxt.droid.NXT_Commands.*;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
@@ -15,7 +14,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -47,7 +45,6 @@ public class GyroControlActivity extends Activity implements
 		setContentView(R.layout.control);
 		findViewById(R.id.stopButton).getRootView();
 
-		String deviceName = getIntent().getExtras().getString("device");
 
 		final Button stop = (Button) findViewById(R.id.stopButton);
 		stop.setOnClickListener(new OnClickListener() {

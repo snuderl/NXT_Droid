@@ -15,8 +15,8 @@
         android:label="@string/app_name" >
         <activity
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:name=".NXT_DroidActivity" >
+            android:name=".NXT_DroidActivity"
+            android:theme="@android:style/Theme.NoTitleBar" >
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,12 +25,14 @@
         </activity>
         <activity
             android:keepScreenOn="true"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:name=".Tab" >
+            android:name=".Tab"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" 
+             android:screenOrientation="landscape" android:configChanges="keyboardHidden|orientation"
+            >
         </activity>
         <activity
             android:keepScreenOn="true"
-            android:name=".JoystickControlActivity">
+            android:name=".JoystickControlActivity" >
         </activity>
         <activity
             android:keepScreenOn="true"
