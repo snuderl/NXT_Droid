@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:id="@+id/choose_speed" android:title="Choose speed" />
-	<item android:id="@+id/toggle_control" android:title="Toggle control" />
 	<item android:id="@+id/connect" android:title="Connect/disconect" />
 	<item android:id="@+id/morse" android:title="Play morse code" />
 	<item android:id="@+id/custom" android:title="Custom command" />

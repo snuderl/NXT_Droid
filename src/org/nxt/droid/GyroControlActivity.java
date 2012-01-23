@@ -20,14 +20,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -53,28 +49,19 @@ public class GyroControlActivity extends Activity implements
 
 		String deviceName = getIntent().getExtras().getString("device");
 
-		if (deviceName != null) {
-			for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter()
-					.getBondedDevices()) {
-				if (device.getName().equals(deviceName)) {
-					nxtDevice = device;
-				}
-			}
-			TextView twNaprava = (TextView) findViewById(R.id.deviceName);
-			twNaprava.setText("Naprava: " + deviceName);
-
-		}
-
-		// No device, exit
-		if (nxtDevice == null) {
-			finish();
-		}
-
-		Button stop = (Button) findViewById(R.id.stopButton);
+		final Button stop = (Button) findViewById(R.id.stopButton);
 		stop.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				pauseSensor = pauseSensor ? false : true;
+				if (!pauseSensor) {
+					stop.setText("Stop");
+					imageSending.setImageResource(R.drawable.useronline);
+				} else {
+					imageSending.setImageResource(R.drawable.useroffline);
+					stop.setText("Resume");
+				}
 				control.send(Packet.make(STOP, "STOP"));
 
 			}
@@ -109,61 +96,12 @@ public class GyroControlActivity extends Activity implements
 		mprogress = (ProgressBar) findViewById(R.id.progressBar1);
 
 	}
-	
+
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
 		sManager.unregisterListener(this);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.choose_speed:
-			chooseSpeed();
-			return true;
-		case R.id.toggle_control:
-			pauseSensor = pauseSensor ? false : true;
-			if (!pauseSensor) {
-				imageSending.setImageResource(R.drawable.useronline);
-			} else {
-				imageSending.setImageResource(R.drawable.useroffline);
-			}
-			return true;
-		case R.id.connect:
-			if (!control.isConnected()) {
-
-				Log.d("Tag", "Connecting");
-				mprogress.setVisibility(View.VISIBLE);
-				new AsyncConnect().execute(control);
-
-			} else {
-
-				Log.d("Tag", "Disconecting");
-				control.disconect();
-			}
-			return true;
-		case R.id.morse:
-			createMorseInput();
-			return true;
-		case R.id.custom:
-			createCustomCommandInput();
-			return true;
-		case R.id.calibrate:
-			calibrate();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
 	}
 
 	public void calibrate() {
@@ -187,21 +125,6 @@ public class GyroControlActivity extends Activity implements
 		AlertDialog alert = builder.create();
 		alert.show();
 
-	}
-
-	public void chooseSpeed() {
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Choose speed");
-		builder.setItems(items, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int item) {
-				Toast.makeText(getApplicationContext(), items[item],
-						Toast.LENGTH_SHORT).show();
-				speed = SPEED.valueOf(items[item].toString());
-			}
-		});
-		AlertDialog alert = builder.create();
-		alert.show();
 	}
 
 	// When this Activity isn't visible anymore
@@ -250,6 +173,14 @@ public class GyroControlActivity extends Activity implements
 				Toast.makeText(getApplicationContext(), text,
 						Toast.LENGTH_SHORT).show();
 				break;
+
+			case 3:
+				int status = msg.arg1;
+				if (status == 1) {
+					statusImage.setImageResource(R.drawable.useronline);
+				} else {
+					statusImage.setImageResource(R.drawable.useroffline);
+				}
 			}
 		}
 	}
@@ -283,8 +214,8 @@ public class GyroControlActivity extends Activity implements
 		steerView.setText("Steer: " + steer + ".\n Speed: " + forward);
 
 		if (!pauseSensor) {
-
-			String content = Packet.content(forward * speed.speed, steer);
+			float speed = ((Tab) getParent()).speed.getSpeed();
+			String content = Packet.content(forward * speed, steer);
 
 			control.send(Packet.make(STEER, content));
 		}
@@ -303,7 +234,7 @@ public class GyroControlActivity extends Activity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d("Resume","Resumed");
+		Log.d("Resume", "Resumed");
 		/*
 		 * register the sensor listener to listen to the gyroscope sensor, use
 		 * the callbacks defined in this class, and gather the sensor
@@ -315,68 +246,14 @@ public class GyroControlActivity extends Activity implements
 
 	}
 
-	public void createMorseInput() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle("Title");
-		alert.setMessage("Message");
-
-		// Set an EditText view to get user input
-		final EditText input = new EditText(this);
-		alert.setView(input);
-
-		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				String value = input.getText().toString();
-				control.send(Packet.make(MORSE, value));
-			}
-		});
-
-		alert.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Canceled.
-					}
-				});
-
-		alert.show();
-
-	}
-
-	public void createCustomCommandInput() {
-
-		LayoutInflater factory = LayoutInflater.from(this);
-
-		final View textEntryView = factory.inflate(R.layout.twoinputs, null);
-
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle("Custom command");
-		alert.setMessage("Enter command and data:");
-		// Set an EditText view to get user input
-		alert.setView(textEntryView);
-		final EditText input1 = (EditText) textEntryView
-				.findViewById(R.id.editText1);
-		final EditText input2 = (EditText) textEntryView
-				.findViewById(R.id.editText2);
-
-		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				String command = input1.getText().toString();
-				String data = input2.getText().toString();
-				control.send(Packet.make(command, data));
-			}
-		});
-
-		alert.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Canceled.
-					}
-				});
-
-		alert.show();
-
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.calibrate:
+			calibrate();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	// a TextView
@@ -385,60 +262,15 @@ public class GyroControlActivity extends Activity implements
 	private SensorManager sManager;
 
 	BT control;
-
 	TextView recieved;
 	BluetoothDevice nxtDevice = null;
 	BluetoothSocket bs = null;
 	ImageView statusImage = null;
 	ImageView imageSending = null;
 	boolean sending = false;
-	SPEED speed = SPEED.SLOW;
 	ProgressBar mprogress;
 	TextView steerView;
 	float[] orientation = null;
 	float orientationSpeedBase = 45;
 	float orientationSteerBase = 90;
-
-	final CharSequence[] items = { "SLOW", "NORMAL", "TURBO" };
-
-	public enum SPEED {
-		SLOW(0.25f), NORMAL(0.5f), TURBO(1);
-
-		private float speed;
-
-		private SPEED(float c) {
-			speed = c;
-		}
-
-		public float getSpeed() {
-			return speed;
-		}
-	}
-
-	private class AsyncConnect extends AsyncTask<BT, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(BT... params) {
-
-			BT control = params[0];
-			boolean b = control.connect(nxtDevice);
-			return b;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			mprogress.setVisibility(View.GONE);
-			if (result) {
-				CharSequence text = "Connection success";
-				Toast.makeText(getApplicationContext(), text,
-						Toast.LENGTH_SHORT).show();
-				statusImage.setImageResource(R.drawable.useronline);
-			} else {
-				CharSequence text = "Connection failed";
-				Toast.makeText(getApplicationContext(), text,
-						Toast.LENGTH_SHORT).show();
-				statusImage.setImageResource(R.drawable.useroffline);
-			}
-
-		}
-	}
 }

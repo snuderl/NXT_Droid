@@ -11,21 +11,21 @@ class BTManager implements IBTUser {
 	float[] pos;
 	ArrayList<Handler> registered = new ArrayList<Handler>();
 	static private BTManager singleton = null;
-	
+
 	public static BTManager getManager() {
-		if(singleton==null) {
-			singleton=new BTManager();
+		if (singleton == null) {
+			singleton = new BTManager();
 		}
 		return singleton;
 	}
-	
-	private BTManager() {}
-	
-	
+
+	private BTManager() {
+	}
+
 	public void registerHandler(Handler a) {
 		registered.add(a);
 	}
-	
+
 	public void unregisterHandler(Handler a) {
 		registered.remove(a);
 	}
@@ -38,7 +38,7 @@ class BTManager implements IBTUser {
 		Message m = new Message();
 		m.what = this.message;
 		m.setData(b);
-		
+
 		for (Handler h : registered) {
 			h.sendMessage(m);
 		}
@@ -51,5 +51,16 @@ class BTManager implements IBTUser {
 		for (Handler h : registered) {
 			h.sendMessage(m);
 		}
+	}
+
+	@Override
+	public void onConnect(boolean connected) {
+		Message m = new Message();
+		m.what = 3;
+		m.arg1 = connected ? 1 : 0;
+		for (Handler h : registered) {
+			h.sendMessage(m);
+		}
+
 	}
 }

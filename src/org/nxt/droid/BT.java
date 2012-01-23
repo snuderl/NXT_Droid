@@ -52,6 +52,12 @@ public class BT extends Thread {
 				@Override
 				public void onDisconnect() {
 				}
+
+				@Override
+				public void onConnect(boolean b) {
+					// TODO Auto-generated method stub
+					
+				}
 			};
 		}
 	}
@@ -91,6 +97,7 @@ public class BT extends Thread {
 		}
 		keepAlive = new Timer();
 		keepAlive.schedule(new KeepAlive(), 100, 1000);
+		callback.onConnect(connected);
 		return connected;
 	}
 
