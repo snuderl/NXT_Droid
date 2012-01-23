@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -36,17 +37,17 @@ public class GyroControlActivity extends Activity implements
 		SensorEventListener {
 	boolean pauseSensor = true;
 	NXTHandler handler = null;
+	View layout;
 
 	protected void onCreate(Bundle savedInstanceState) {
 
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.control);
-		findViewById(R.id.stopButton).getRootView();
+		findViewById(R.id.btnStop).getRootView();
+		layout=findViewById(R.id.controllayout);
 
-
-		final Button stop = (Button) findViewById(R.id.stopButton);
+		final Button stop = (Button) findViewById(R.id.btnStop);
 		stop.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -54,9 +55,9 @@ public class GyroControlActivity extends Activity implements
 				pauseSensor = pauseSensor ? false : true;
 				if (!pauseSensor) {
 					stop.setText("Stop");
-					imageSending.setImageResource(R.drawable.useronline);
+					// imageSending.setImageResource(R.drawable.useronline);
 				} else {
-					imageSending.setImageResource(R.drawable.useroffline);
+					// imageSending.setImageResource(R.drawable.useroffline);
 					stop.setText("Resume");
 				}
 				control.send(Packet.make(STOP, "STOP"));
@@ -64,7 +65,7 @@ public class GyroControlActivity extends Activity implements
 			}
 		});
 
-		Button claw = (Button) findViewById(R.id.claws);
+		Button claw = (Button) findViewById(R.id.btnClaws);
 		claw.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -74,23 +75,18 @@ public class GyroControlActivity extends Activity implements
 			}
 		});
 
-		statusImage = (ImageView) findViewById(R.id.imageView1);
-		statusImage.setImageResource(R.drawable.useroffline);
+		// statusImage = (ImageView) findViewById(R.id.imageView1);
+		// statusImage.setImageResource(R.drawable.useroffline);
 
-		tv = (TextView) findViewById(R.id.textView1);
-		steerView = (TextView) findViewById(R.id.textView4);
+		steerView = (TextView) findViewById(R.id.steer1);
 
-		imageSending = (ImageView) findViewById(R.id.imageSending);
-		imageSending.setImageResource(R.drawable.useroffline);
+		// imageSending = (ImageView) findViewById(R.id.imageSending);
+		// imageSending.setImageResource(R.drawable.useroffline);
 
 		handler = new NXTHandler();
 		BTManager.getManager().registerHandler(handler);
 		sManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		control = BT.getBT();
-
-		tv = (TextView) findViewById(R.id.textView1);
-
-		mprogress = (ProgressBar) findViewById(R.id.progressBar1);
 
 	}
 
@@ -134,11 +130,6 @@ public class GyroControlActivity extends Activity implements
 	}
 
 	@Override
-	public void onAccuracyChanged(Sensor arg0, int arg1) {
-		// Do nothing
-	}
-
-	@Override
 	public void onSensorChanged(SensorEvent event) {
 		// if sensor is unreliable, return void
 		if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
@@ -147,9 +138,6 @@ public class GyroControlActivity extends Activity implements
 		}
 
 		orientation = event.values;
-		tv.setText("Os X :" + Float.toString(event.values[2]) + "\n" + "Os Y :"
-				+ Float.toString(event.values[1]) + "\n" + "Os Z :"
-				+ Float.toString(event.values[0]));
 
 		calculateSteering(event.values[2], event.values[0], event.values[1]);
 	}
@@ -164,19 +152,23 @@ public class GyroControlActivity extends Activity implements
 				Log.d("NXTHANDLER", "Recived: " + recived);
 				break;
 			case 2:
-				statusImage.setImageResource(R.drawable.useroffline);
-
-				CharSequence text = "Connection failed, try reconnectiong...";
-				Toast.makeText(getApplicationContext(), text,
-						Toast.LENGTH_SHORT).show();
+				// statusImage.setImageResource(R.drawable.useroffline);
+				layout.setBackgroundResource(
+						R.drawable.ozadje);
 				break;
 
 			case 3:
 				int status = msg.arg1;
 				if (status == 1) {
-					statusImage.setImageResource(R.drawable.useronline);
+
+					layout.setBackgroundResource(
+							R.drawable.ozadje2);
+
+					// statusImage.setImageResource(R.drawable.useronline);
 				} else {
-					statusImage.setImageResource(R.drawable.useroffline);
+					// statusImage.setImageResource(R.drawable.useroffline);
+					layout.setBackgroundResource(
+							R.drawable.ozadje);
 				}
 			}
 		}
@@ -270,4 +262,10 @@ public class GyroControlActivity extends Activity implements
 	float[] orientation = null;
 	float orientationSpeedBase = 45;
 	float orientationSteerBase = 90;
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		// TODO Auto-generated method stub
+
+	}
 }

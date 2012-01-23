@@ -40,7 +40,9 @@ class BTManager implements IBTUser {
 		m.setData(b);
 
 		for (Handler h : registered) {
-			h.sendMessage(m);
+			Message t = new Message();
+			t.copyFrom(m);
+			h.sendMessage(t);
 		}
 	}
 
@@ -49,7 +51,9 @@ class BTManager implements IBTUser {
 		Message m = new Message();
 		m.what = disconnect;
 		for (Handler h : registered) {
-			h.sendMessage(m);
+			Message t = new Message();
+			t.copyFrom(m);
+			h.sendMessage(t);
 		}
 	}
 
@@ -59,7 +63,9 @@ class BTManager implements IBTUser {
 		m.what = 3;
 		m.arg1 = connected ? 1 : 0;
 		for (Handler h : registered) {
-			h.sendMessage(m);
+			Message t = new Message();
+			t.copyFrom(m);
+			h.sendMessage(t);
 		}
 
 	}
