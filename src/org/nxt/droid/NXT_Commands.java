@@ -12,4 +12,5 @@ public class NXT_Commands {
 	public static final String STEER = "STEER";
 	public static final String MORSE = "MORSE";
 	public static final String KEEPALIVE = "KeepAlive";
+	public static final String STATS = "STATS";
 }

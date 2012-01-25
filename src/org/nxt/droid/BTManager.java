@@ -7,7 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 
 class BTManager implements IBTUser {
-	final int message = 1, disconnect = 2;
+	public static final int messageRecived = 1, disconnect = 2, connect=3;
 	float[] pos;
 	ArrayList<Handler> registered = new ArrayList<Handler>();
 	static private BTManager singleton = null;
@@ -33,10 +33,10 @@ class BTManager implements IBTUser {
 	@Override
 	public void recived(String message) {
 		Bundle b = new Bundle();
-		b.putString("content", message);
+		b.putString("vsebina", message);
 
 		Message m = new Message();
-		m.what = this.message;
+		m.what = messageRecived;
 		m.setData(b);
 
 		for (Handler h : registered) {

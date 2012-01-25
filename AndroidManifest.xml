@@ -38,6 +38,7 @@
             android:keepScreenOn="true"
             android:name=".GyroControlActivity" >
         </activity>
+        <activity android:name="StatisticsActivity"></activity>
     </application>
 
 </manifest>

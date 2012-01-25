@@ -74,12 +74,12 @@ public class JoystickControlActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case 2:
+			case BTManager.disconnect:
 				layout.setBackgroundResource(
 						R.drawable.ozadje);
 				break;
 
-			case 3:
+			case BTManager.connect:
 				int status = msg.arg1;
 				if (status == 1) {
 

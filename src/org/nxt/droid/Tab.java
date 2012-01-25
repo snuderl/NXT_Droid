@@ -189,6 +189,8 @@ public class Tab extends TabActivity {
 		setupTab(new TextView(this), "Gyro", intent);
 		intent = new Intent().setClass(this, JoystickControlActivity.class);
 		setupTab(new TextView(this), "Jostick", intent);
+		intent = new Intent().setClass(this, StatisticsActivity.class);
+		setupTab(new TextView(this), "Stats", intent);
 
 		if (deviceName != null) {
 			for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter()
@@ -260,7 +262,7 @@ public class Tab extends TabActivity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case 2:
+			case BTManager.disconnect:
 				Toast.makeText(getApplicationContext(), "Connection failed, try reconnecting...", Toast.LENGTH_SHORT).show();
 				break;
 			}

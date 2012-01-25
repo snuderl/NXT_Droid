@@ -129,8 +129,10 @@ public class BT extends Thread {
 					if (!queue.isEmpty()) {
 						try {
 							String m = queue.poll();
+							Packet p = new Packet(m);
 							dataOut.writeUTF(m);
 							dataOut.flush();
+							reading=p.response;
 						} catch (IOException e) {
 							Log.e(TAG, "Execption while sending", e);
 							isRunning = false;

@@ -46,6 +46,9 @@ public class GyroControlActivity extends Activity implements
 		setContentView(R.layout.control);
 		findViewById(R.id.btnStop).getRootView();
 		layout=findViewById(R.id.controllayout);
+		if(BT.getBT().isConnected()) {
+			layout.setBackgroundResource(R.drawable.ozadje2);
+		}
 
 		final Button stop = (Button) findViewById(R.id.btnStop);
 		stop.setOnClickListener(new OnClickListener() {
@@ -147,17 +150,17 @@ public class GyroControlActivity extends Activity implements
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case 1:
+			case BTManager.messageRecived:
 				String recived = (String) msg.getData().get("vsebina");
 				Log.d("NXTHANDLER", "Recived: " + recived);
 				break;
-			case 2:
+			case BTManager.disconnect:
 				// statusImage.setImageResource(R.drawable.useroffline);
 				layout.setBackgroundResource(
 						R.drawable.ozadje);
 				break;
 
-			case 3:
+			case BTManager.connect:
 				int status = msg.arg1;
 				if (status == 1) {
 

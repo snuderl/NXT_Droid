@@ -12,8 +12,12 @@ import java.util.ArrayList;
 
 public class Packet {
 
+	static public String make(String command, String content, Boolean response) {
+		return command + "||" + content + "||" + response;
+	}
+	
 	static public String make(String command, String content) {
-		return command + "||" + content;
+		return make(command, content, false);
 	}
 
 	public static String content(Object... data) {
@@ -26,6 +30,7 @@ public class Packet {
 
 		final String packet;
 		final String command;
+		final Boolean response;
 		final String[] values;
 
 		public String[] split(String s, String exp) {
@@ -55,6 +60,7 @@ public class Packet {
 			String[] polje = split(packet, "||");
 			command = polje[0];
 			values = split(polje[1], "::");
+			response = Boolean.parseBoolean(polje[2]);
 		}
 
 		public String getCommand() {
