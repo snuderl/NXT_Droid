@@ -13,12 +13,20 @@ public class StatisticsActivity extends Activity {
 	TextView text;
 	Button getStats;
 	Handler handler;
+	View layout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.statistics);
+
+		layout = findViewById(R.id.statsid);
+		if (BT.getBT().isConnected()) {
+			layout.setBackgroundResource(R.drawable.ozadje2);
+		} else {
+			layout.setBackgroundResource(R.drawable.ozadje);
+		}
 
 		text = (TextView) findViewById(R.id.textStats);
 		getStats = (Button) findViewById(R.id.btnStats);
@@ -49,13 +57,35 @@ public class StatisticsActivity extends Activity {
 			switch (msg.what) {
 			case BTManager.messageRecived:
 				String recived = (String) msg.getData().get("vsebina");
-				Packet p = new Packet(recived);
-				if (p.command.equals(NXT_Commands.STATS)) {
-					text.setText(p.packet);
+				text.setText(recived);
+				//				Packet p = new Packet(recived);
+//				if (p.command.equals(NXT_Commands.STATS)) {
+//					StringBuilder b = new StringBuilder();
+//					for (Object o : p.values) {
+//						b.append(o.toString() + "/n");
+//					}
+//					text.setText(b.toString());
+//				}
+
+			case BTManager.disconnect:
+				// statusImage.setImageResource(R.drawable.useroffline);
+				layout.setBackgroundResource(R.drawable.ozadje);
+				break;
+
+			case BTManager.connect:
+				int status = msg.arg1;
+				if (status == 1) {
+
+					layout.setBackgroundResource(R.drawable.ozadje2);
+
+					// statusImage.setImageResource(R.drawable.useronline);
+				} else {
+					// statusImage.setImageResource(R.drawable.useroffline);
+					layout.setBackgroundResource(R.drawable.ozadje);
 				}
+				// TODO Auto-generated method stub
+				super.handleMessage(msg);
 			}
-			// TODO Auto-generated method stub
-			super.handleMessage(msg);
 		}
 	}
 }

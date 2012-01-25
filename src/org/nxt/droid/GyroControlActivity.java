@@ -124,13 +124,7 @@ public class GyroControlActivity extends Activity implements
 	}
 
 	// When this Activity isn't visible anymore
-	@Override
-	protected void onStop() {
-		// unregister the sensor listener
-		sManager.unregisterListener(this);
-		BTManager.getManager().unregisterHandler(handler);
-		super.onStop();
-	}
+
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {

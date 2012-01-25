@@ -31,6 +31,9 @@ public class JoystickControlActivity extends Activity {
 		joystick = (JostickView) findViewById(R.id.joystickView1);
 		controls = BT.getBT();
 		layout = findViewById(R.id.jostickLayout);
+		if(BT.getBT().isConnected()) {
+			layout.setBackgroundResource(R.drawable.ozadje2);
+		}
 
 		joystick.setOnJostickMovedListener(_listener);
 		text=(TextView)findViewById(R.id.textViewJostick);
@@ -54,9 +57,11 @@ public class JoystickControlActivity extends Activity {
 
 		@Override
 		public void OnMoved(int pan, int tilt) {
+			pan = pan * 9;
+			tilt = -tilt*5;
 			float speed = ((Tab) getParent()).speed.getSpeed();
-			String content = Packet.content(pan*speed, tilt);
-			text.setText("Hitrost: "+pan*speed+"\nSteer: "+tilt);
+			String content = Packet.content(tilt*speed, pan);
+			text.setText("Hitrost: "+tilt*speed+"\nSteer: "+pan);
 			controls.send(Packet.make(STEER, content));
 		}
 
@@ -96,10 +101,5 @@ public class JoystickControlActivity extends Activity {
 		}
 	}
 	
-	@Override
-	protected void onStop() {
-		// TODO Auto-generated method stub
-		super.onStop();
-		BTManager.getManager().unregisterHandler(handler);
-	}
+
 }

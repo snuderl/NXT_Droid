@@ -189,8 +189,8 @@ public class Tab extends TabActivity {
 		setupTab(new TextView(this), "Gyro", intent);
 		intent = new Intent().setClass(this, JoystickControlActivity.class);
 		setupTab(new TextView(this), "Jostick", intent);
-		intent = new Intent().setClass(this, StatisticsActivity.class);
-		setupTab(new TextView(this), "Stats", intent);
+		//intent = new Intent().setClass(this, StatisticsActivity.class);
+		//setupTab(new TextView(this), "Stats", intent);
 
 		if (deviceName != null) {
 			for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter()
@@ -211,7 +211,6 @@ public class Tab extends TabActivity {
 	@Override
 	protected void onStop() {
 		BT.getBT().end();
-		BTManager.getManager().unregisterHandler(handler);
 		super.onStop();
 	}
 
