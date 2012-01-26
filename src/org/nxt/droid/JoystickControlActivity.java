@@ -6,12 +6,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class JoystickControlActivity extends Activity {
 
@@ -21,6 +19,7 @@ public class JoystickControlActivity extends Activity {
 	JoystickHandler handler;
 	TextView text;
 	View layout;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -31,14 +30,13 @@ public class JoystickControlActivity extends Activity {
 		joystick = (JostickView) findViewById(R.id.joystickView1);
 		controls = BT.getBT();
 		layout = findViewById(R.id.jostickLayout);
-		if(BT.getBT().isConnected()) {
+		if (BT.getBT().isConnected()) {
 			layout.setBackgroundResource(R.drawable.ozadje2);
 		}
 
 		joystick.setOnJostickMovedListener(_listener);
-		text=(TextView)findViewById(R.id.textViewJostick);
-		
-		
+		text = (TextView) findViewById(R.id.textViewJostick);
+
 		claw = (Button) findViewById(R.id.btnKlesce);
 		claw.setOnClickListener(new OnClickListener() {
 
@@ -48,20 +46,18 @@ public class JoystickControlActivity extends Activity {
 
 			}
 		});
-		
-	}
-	
 
+	}
 
 	private JostickMovedListener _listener = new JostickMovedListener() {
 
 		@Override
 		public void OnMoved(int pan, int tilt) {
 			pan = pan * 9;
-			tilt = -tilt*5;
+			tilt = -tilt * 5;
 			float speed = ((Tab) getParent()).speed.getSpeed();
-			String content = Packet.content(tilt*speed, pan);
-			text.setText("Hitrost: "+tilt*speed+"\nSteer: "+pan);
+			String content = Packet.content(tilt * speed, pan);
+			text.setText("Hitrost: " + tilt * speed + "\nSteer: " + pan);
 			controls.send(Packet.make(STEER, content));
 		}
 
@@ -72,34 +68,29 @@ public class JoystickControlActivity extends Activity {
 			controls.send(Packet.make(STOP, content));
 		}
 	};
-	
-	
+
 	class JoystickHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case BTManager.disconnect:
-				layout.setBackgroundResource(
-						R.drawable.ozadje);
+				layout.setBackgroundResource(R.drawable.ozadje);
 				break;
 
 			case BTManager.connect:
 				int status = msg.arg1;
 				if (status == 1) {
 
-					layout.setBackgroundResource(
-							R.drawable.ozadje2);
+					layout.setBackgroundResource(R.drawable.ozadje2);
 
 					// statusImage.setImageResource(R.drawable.useronline);
 				} else {
 					// statusImage.setImageResource(R.drawable.useroffline);
-					layout.setBackgroundResource(
-							R.drawable.ozadje);
+					layout.setBackgroundResource(R.drawable.ozadje);
 				}
 			}
 		}
 	}
-	
 
 }

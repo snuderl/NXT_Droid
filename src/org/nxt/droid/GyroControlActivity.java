@@ -10,7 +10,6 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -45,8 +44,8 @@ public class GyroControlActivity extends Activity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.control);
 		findViewById(R.id.btnStop).getRootView();
-		layout=findViewById(R.id.controllayout);
-		if(BT.getBT().isConnected()) {
+		layout = findViewById(R.id.controllayout);
+		if (BT.getBT().isConnected()) {
 			layout.setBackgroundResource(R.drawable.ozadje2);
 		}
 
@@ -125,7 +124,6 @@ public class GyroControlActivity extends Activity implements
 
 	// When this Activity isn't visible anymore
 
-
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		// if sensor is unreliable, return void
@@ -150,22 +148,19 @@ public class GyroControlActivity extends Activity implements
 				break;
 			case BTManager.disconnect:
 				// statusImage.setImageResource(R.drawable.useroffline);
-				layout.setBackgroundResource(
-						R.drawable.ozadje);
+				layout.setBackgroundResource(R.drawable.ozadje);
 				break;
 
 			case BTManager.connect:
 				int status = msg.arg1;
 				if (status == 1) {
 
-					layout.setBackgroundResource(
-							R.drawable.ozadje2);
+					layout.setBackgroundResource(R.drawable.ozadje2);
 
 					// statusImage.setImageResource(R.drawable.useronline);
 				} else {
 					// statusImage.setImageResource(R.drawable.useroffline);
-					layout.setBackgroundResource(
-							R.drawable.ozadje);
+					layout.setBackgroundResource(R.drawable.ozadje);
 				}
 			}
 		}
@@ -228,7 +223,7 @@ public class GyroControlActivity extends Activity implements
 		 */
 		sManager.registerListener(this,
 				sManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-				SensorManager.SENSOR_DELAY_GAME);
+				SensorManager.SENSOR_DELAY_UI);
 
 	}
 
@@ -242,8 +237,6 @@ public class GyroControlActivity extends Activity implements
 		return super.onOptionsItemSelected(item);
 	}
 
-	// a TextView
-	private TextView tv;
 	// the Sensor Manager
 	private SensorManager sManager;
 

@@ -45,12 +45,6 @@ public class StatisticsActivity extends Activity {
 
 	}
 
-	@Override
-	protected void onStop() {
-		super.onStop();
-		BTManager.getManager().unregisterHandler(handler);
-	}
-
 	class StatsHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
