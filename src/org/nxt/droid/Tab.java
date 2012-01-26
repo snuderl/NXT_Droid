@@ -174,8 +174,8 @@ public class Tab extends TabActivity {
 		super.onCreate(savedInstanceState);
 		// construct the tabhost
 		setContentView(R.layout.tablayout);
-		
-		handler= new TabHandler();
+
+		handler = new TabHandler();
 		BTManager.getManager().registerHandler(handler);
 
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
@@ -189,8 +189,8 @@ public class Tab extends TabActivity {
 		setupTab(new TextView(this), "Gyro", intent);
 		intent = new Intent().setClass(this, JoystickControlActivity.class);
 		setupTab(new TextView(this), "Jostick", intent);
-		//intent = new Intent().setClass(this, StatisticsActivity.class);
-		//setupTab(new TextView(this), "Stats", intent);
+		// intent = new Intent().setClass(this, StatisticsActivity.class);
+		// setupTab(new TextView(this), "Stats", intent);
 
 		if (deviceName != null) {
 			for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter()
@@ -207,7 +207,7 @@ public class Tab extends TabActivity {
 			finish();
 		}
 	}
-	
+
 	@Override
 	protected void onStop() {
 		BT.getBT().end();
@@ -262,7 +262,9 @@ public class Tab extends TabActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case BTManager.disconnect:
-				Toast.makeText(getApplicationContext(), "Connection failed, try reconnecting...", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(),
+						"Connection failed, try reconnecting...",
+						Toast.LENGTH_SHORT).show();
 				break;
 			}
 		}

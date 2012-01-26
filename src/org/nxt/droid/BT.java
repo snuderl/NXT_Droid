@@ -19,7 +19,7 @@ import android.util.Log;
  * @author BlaZ Snuderl
  * 
  */
-public class BT extends Thread {
+public class BT {
 	IBTUser callback;
 	BluetoothSocket bs = null;
 	BluetoothDevice nxtDevice = null;
@@ -30,7 +30,6 @@ public class BT extends Thread {
 	public static BT getBT() {
 		if (singleton == null) {
 			singleton = new BT(BTManager.getManager());
-			singleton.run();
 		}
 		return singleton;
 	}
@@ -56,7 +55,7 @@ public class BT extends Thread {
 				@Override
 				public void onConnect(boolean b) {
 					// TODO Auto-generated method stub
-					
+
 				}
 			};
 		}
@@ -69,6 +68,7 @@ public class BT extends Thread {
 	}
 
 	public boolean connect(BluetoothDevice device) {
+		reader.isRunning = false;
 		nxtDevice = device;
 
 		boolean connected = false;
@@ -132,7 +132,7 @@ public class BT extends Thread {
 							Packet p = new Packet(m);
 							dataOut.writeUTF(m);
 							dataOut.flush();
-							reading=p.response;
+							reading = p.response;
 						} catch (IOException e) {
 							Log.e(TAG, "Execption while sending", e);
 							isRunning = false;
@@ -149,8 +149,6 @@ public class BT extends Thread {
 			}
 			end();
 			try {
-				dataIn.close();
-				dataOut.close();
 				bs.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -167,12 +165,14 @@ public class BT extends Thread {
 	void disconect() {
 		reader.isRunning = false;
 		reader.reading = false;
+
 	}
 
 	void end() {
+		callback.onDisconnect();
+
 		reader.isRunning = false;
 		reader.reading = false;
-		callback.onDisconnect();
 	}
 
 	public void send(String message) {

@@ -228,7 +228,7 @@ public class GyroControlActivity extends Activity implements
 		 */
 		sManager.registerListener(this,
 				sManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-				SensorManager.SENSOR_DELAY_GAME);
+				SensorManager.SENSOR_DELAY_UI);
 
 	}
 
